@@ -1,0 +1,97 @@
+{
+  "nav": {
+    "dashboard": "डैशबोर्ड",
+    "alerts": "आपदा अलर्ट",
+    "broadcast": "चेतावनी प्रसारण",
+    "contacts": "आपातकालीन संपर्क",
+    "weather": "मौसम व पूर्वानुमान",
+    "news": "समाचार बुलेटिन",
+    "mesh": "मेश नेटवर्क",
+    "whatsapp": "व्हाट्सएप बॉट",
+    "citizenPortal": "नागरिक पोर्टल",
+    "demoMode": "डेमो मोड",
+    "login": "लॉग इन",
+    "logout": "लॉग आउट"
+  },
+  "status": {
+    "live": "सक्रिय (LIVE)",
+    "reconnecting": "पुनः कनेक्ट हो रहा है",
+    "meshOffline": "मेश ऑफ़लाइन",
+    "normal": "सामान्य",
+    "warning": "चेतावनी",
+    "critical": "गंभीर खतरा",
+    "offline": "ऑफ़लाइन",
+    "dispatched": "राहत दल रवाना",
+    "acknowledged": "स्वीकृत",
+    "resolved": "समाधानित"
+  },
+  "stats": {
+    "nodesOnline": "सक्रिय सेंसर नोड्स",
+    "openAlerts": "सक्रिय आपदा अलर्ट",
+    "bandwidthSaved": "बैंडविड्थ बचत",
+    "bandwidthDetail": "2.4 GB डेटा डिवाइस पर विश्लेषित, केवल 12 KB भेजा गया",
+    "whatsappToday": "आज भेजे गए व्हाट्सएप संदेश",
+    "lastAlert": "अंतिम अलर्ट समय"
+  },
+  "helpline": {
+    "national": "राष्ट्रीय आपातकाल",
+    "ndrf": "NDRF आपदा राहत",
+    "sdrf": "SDRF नियंत्रण कक्ष",
+    "fire": "अग्निशमन सेवा",
+    "ambulance": "एम्बुलेंस सेवा"
+  },
+  "nodeDrawer": {
+    "realHardware": "भौतिक हार्डवेयर",
+    "simulated": "सिम्युलेटेड",
+    "readings": "सेंसर रीडिंग",
+    "waterLevel": "जलस्तर",
+    "rateOfChange": "बढ़ने की दर",
+    "pm25": "वायु गुणवत्ता (PM2.5)",
+    "temp": "तापमान",
+    "humidity": "आर्द्रता",
+    "smoke": "धुआं सूचकांक",
+    "battery": "बैटरी स्तर",
+    "signal": "सिग्नल शक्ति",
+    "meshLevel": "मेश हॉप स्तर",
+    "parent": "पैरेंट रिले नोड",
+    "lastSeen": "अंतिम सक्रिय",
+    "onDeviceVerdict": "डिवाइस पर निर्णय लिया गया",
+    "sparklineTitle": "अंतिम 50 रीडिंग रुझान",
+    "centerOnMap": "मानचित्र पर देखें"
+  },
+  "alertsPage": {
+    "title": "आपदा चेतावनी एवं घटना प्रबंधन",
+    "filterAll": "सभी",
+    "filterOpen": "सक्रिय",
+    "filterCritical": "अति गंभीर",
+    "filterWarning": "चेतावनी",
+    "acknowledge": "स्वीकार करें",
+    "resolve": "समाप्त करें",
+    "deployNdrf": "NDRF तैनात करें",
+    "deliveredAfterOutage": "आउटेज के बाद प्राप्त",
+    "verifiedBySarpanch": "सरपंच द्वारा सत्यापित",
+    "unverified": "असत्यापित"
+  },
+  "broadcastPage": {
+    "title": "व्हाट्सएप आपातकालीन प्रसारण",
+    "subtitle": "ग्राम पंचायतों और नागरिकों को भू-लक्षित त्वरित अलर्ट",
+    "step1": "1. मानचित्र पर केंद्र चुनें",
+    "step2": "2. चेतावनी दायरा चुनें",
+    "step3": "3. अलर्ट संदेश टेम्पलेट चुनें",
+    "recipientsEstimated": "लगभग {{count}} नागरिकों को व्हाट्सएप पर सूचित किया जाएगा",
+    "sendButton": "चेतावनी प्रसारित करें",
+    "confirmTitle": "आपातकालीन प्रसारण की पुष्टि करें",
+    "confirmText": "क्या आप निश्चित रूप से यह महत्वपूर्ण चेतावनी {{count}} नागरिकों को भेजना चाहते हैं?"
+  },
+  "citizen": {
+    "safeTitle": "आपका क्षेत्र सुरक्षित है",
+    "cautionTitle": "सावधानी बरतें",
+    "evacuateTitle": "तत्काल सुरक्षित स्थान पर जाएं",
+    "nearestShelters": "निकटतम सुरक्षित राहत शिविर",
+    "distance": "किमी दूर",
+    "capacity": "कुल क्षमता",
+    "available": "उपलब्ध स्थान",
+    "callHelp": "आपातकालीन सहायता कॉल करें",
+    "language": "भाषा"
+  }
+}

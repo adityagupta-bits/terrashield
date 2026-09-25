@@ -1,0 +1,97 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "alerts": "Alerts",
+    "broadcast": "Broadcast",
+    "contacts": "Contacts",
+    "weather": "Weather",
+    "news": "News",
+    "mesh": "Mesh Topology",
+    "whatsapp": "WhatsApp",
+    "citizenPortal": "Citizen Portal",
+    "demoMode": "Demo Mode",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "status": {
+    "live": "LIVE",
+    "reconnecting": "RECONNECTING",
+    "meshOffline": "MESH-OFFLINE",
+    "normal": "Normal",
+    "warning": "Warning",
+    "critical": "Critical",
+    "offline": "Offline",
+    "dispatched": "Dispatched",
+    "acknowledged": "Acknowledged",
+    "resolved": "Resolved"
+  },
+  "stats": {
+    "nodesOnline": "Nodes Online",
+    "openAlerts": "Open Alerts",
+    "bandwidthSaved": "Bandwidth Saved",
+    "bandwidthDetail": "Raw 2.4 GB stayed on device, 12 KB sent",
+    "whatsappToday": "WhatsApp Sent Today",
+    "lastAlert": "Last Alert"
+  },
+  "helpline": {
+    "national": "National Emergency",
+    "ndrf": "NDRF Disaster Cell",
+    "sdrf": "SDRF Control Room",
+    "fire": "Fire Service",
+    "ambulance": "Ambulance"
+  },
+  "nodeDrawer": {
+    "realHardware": "REAL HARDWARE",
+    "simulated": "SIMULATED",
+    "readings": "Live Readings",
+    "waterLevel": "Water Level",
+    "rateOfChange": "Rate of Rise",
+    "pm25": "PM2.5 AQI",
+    "temp": "Temperature",
+    "humidity": "Humidity",
+    "smoke": "Smoke Index",
+    "battery": "Battery",
+    "signal": "Signal (RSSI)",
+    "meshLevel": "Mesh Hop Level",
+    "parent": "Parent Relay Node",
+    "lastSeen": "Last Seen",
+    "onDeviceVerdict": "Detected on device",
+    "sparklineTitle": "Last 50 Readings Trend",
+    "centerOnMap": "Center on Map"
+  },
+  "alertsPage": {
+    "title": "Incident Alerts & Emergency Queue",
+    "filterAll": "All",
+    "filterOpen": "Open",
+    "filterCritical": "Critical",
+    "filterWarning": "Warning",
+    "acknowledge": "Acknowledge",
+    "resolve": "Resolve",
+    "deployNdrf": "Deploy NDRF",
+    "deliveredAfterOutage": "Delivered after outage",
+    "verifiedBySarpanch": "Verified by Sarpanch",
+    "unverified": "Unverified"
+  },
+  "broadcastPage": {
+    "title": "WhatsApp Emergency Broadcast",
+    "subtitle": "Geofenced instant alerting to Gram Panchayats and citizens",
+    "step1": "1. Pick Alert Center on Map",
+    "step2": "2. Select Warning Radius",
+    "step3": "3. Choose Alert Template",
+    "recipientsEstimated": "About {{count}} people will be notified on WhatsApp",
+    "sendButton": "SEND BROADCAST",
+    "confirmTitle": "Confirm Emergency Broadcast",
+    "confirmText": "Are you sure you want to dispatch this critical advisory to {{count}} citizens?"
+  },
+  "citizen": {
+    "safeTitle": "YOUR ZONE IS SAFE",
+    "cautionTitle": "CAUTION ADVISED",
+    "evacuateTitle": "EMERGENCY EVACUATION WARNING",
+    "nearestShelters": "Nearest Safe Evacuation Shelters",
+    "distance": "km away",
+    "capacity": "Capacity",
+    "available": "Available spots",
+    "callHelp": "Call Emergency Helpline",
+    "language": "Language"
+  }
+}
