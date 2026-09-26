@@ -11,12 +11,14 @@ from app.models.news import NewsFlash
 from app.models.users import User
 from app.models.mesh import MeshLink
 
-# Backward compatibility model aliases
-SensorNode = Node
-TelemetryRecord = Reading
-IncidentAlert = Alert
-WhatsAppVerification = WhatsAppMessage
-SafeShelter = Contact
+# Backward compatibility models
+from app.models_legacy import (
+    SensorNode,
+    TelemetryRecord,
+    IncidentAlert,
+    WhatsAppVerification,
+    SafeShelter
+)
 
 __all__ = [
     "Base",

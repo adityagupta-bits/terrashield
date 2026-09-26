@@ -6,6 +6,8 @@ import TelemetryPanel from './components/TelemetryPanel';
 import AlertCenter from './components/AlertCenter';
 import WhatsAppBotModal from './components/WhatsAppBotModal';
 import CitizenPortalModal from './components/CitizenPortalModal';
+import CitizenView from './components/CitizenView';
+import GovernmentFooter from './components/GovernmentFooter';
 
 import {
   fetchNodes,
@@ -31,6 +33,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('MAP'); // 'MAP' | 'TOPOLOGY'
   const [wsConnected, setWsConnected] = useState(false);
   const [blackoutActive, setBlackoutActive] = useState(false);
+  const initialView = (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('view')?.toUpperCase() === 'USER') ? 'USER' : 'ADMIN';
+  const [currentView, setCurrentView] = useState(initialView);
 
   // Modals
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
@@ -167,8 +171,8 @@ export default function App() {
   const fireVectors = aiForecast?.fire_spread_vector ? [aiForecast.fire_spread_vector] : [];
 
   return (
-    <div className="app-container">
-      {/* Top Mission Control Bar */}
+    <div className={`app-container ${currentView === 'ADMIN' ? 'admin-theme' : 'user-theme'}`} style={{ height: 'auto', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Top Mission Control Bar & Government Warning Ticker */}
       <Navbar
         wsConnected={wsConnected}
         networkMode={topology.network_mode}
@@ -177,81 +181,104 @@ export default function App() {
           setTargetIncidentId(null);
           setShowWhatsAppModal(true);
         }}
-        onOpenCitizenPortal={() => setShowCitizenModal(true)}
+        onOpenCitizenPortal={() => setCurrentView('USER')}
         onToggleBlackout={handleToggleBlackout}
         blackoutActive={blackoutActive}
         onScenarioTriggered={handleScenarioTriggered}
+        currentView={currentView}
+        onToggleView={(view) => {
+          setCurrentView(view);
+          if (typeof window !== 'undefined') {
+            window.history.replaceState(null, '', view === 'USER' ? '?view=user' : '/');
+          }
+        }}
       />
 
-      {/* Main Cardless Workspace Layout */}
-      <main className="dashboard-layout">
-        {/* Left Area: Visual Map / Topology Viewport (Full-bleed) */}
-        <div className="viewport-pane">
-          <div className="viewport-toolbar">
-            <div className="tab-group">
-              <button
-                className={`tab-btn ${activeTab === 'MAP' ? 'active' : ''}`}
-                onClick={() => setActiveTab('MAP')}
-              >
-                <Map size={14} />
-                <span>GIS Incident & Threat Map</span>
-              </button>
+      {/* Main Workspace Layout: Admin vs Citizen Portal */}
+      {currentView === 'ADMIN' ? (
+        <main className="dashboard-layout" style={{ flex: '1 0 auto' }}>
+          {/* Left Area: Visual Map / Topology Viewport (Full-bleed) */}
+          <div className="viewport-pane">
+            <div className="viewport-toolbar">
+              <div className="tab-group">
+                <button
+                  className={`tab-btn ${activeTab === 'MAP' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('MAP')}
+                >
+                  <Map size={14} />
+                  <span>GIS Incident & Threat Map</span>
+                </button>
 
-              <button
-                className={`tab-btn ${activeTab === 'TOPOLOGY' ? 'active' : ''}`}
-                onClick={() => setActiveTab('TOPOLOGY')}
-              >
-                <Share2 size={14} />
-                <span>Mesh Network Topology</span>
-              </button>
+                <button
+                  className={`tab-btn ${activeTab === 'TOPOLOGY' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('TOPOLOGY')}
+                >
+                  <Share2 size={14} />
+                  <span>Mesh Network Topology</span>
+                </button>
+              </div>
+
+              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                Region: <b style={{ color: '#0f172a' }}>Rishikesh-Garhwal Catchment</b> • 20 Distributed Nodes
+              </div>
             </div>
 
-            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-              Region: <b style={{ color: '#0f172a' }}>Rishikesh-Garhwal Catchment</b> • 20 Distributed Nodes
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden', minHeight: '640px' }}>
+              {activeTab === 'MAP' ? (
+                <MapView
+                  nodes={nodes}
+                  alerts={alerts}
+                  shelters={shelters}
+                  selectedNodeId={selectedNodeId}
+                  onSelectNode={setSelectedNodeId}
+                  fireVectors={fireVectors}
+                />
+              ) : (
+                <MeshTopologyView
+                  topology={topology}
+                  selectedNodeId={selectedNodeId}
+                  onSelectNode={setSelectedNodeId}
+                  onToggleBlackout={handleToggleBlackout}
+                />
+              )}
             </div>
           </div>
 
-          <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-            {activeTab === 'MAP' ? (
-              <MapView
-                nodes={nodes}
-                alerts={alerts}
-                shelters={shelters}
-                selectedNodeId={selectedNodeId}
-                onSelectNode={setSelectedNodeId}
-                fireVectors={fireVectors}
-              />
-            ) : (
-              <MeshTopologyView
-                topology={topology}
-                selectedNodeId={selectedNodeId}
-                onSelectNode={setSelectedNodeId}
-                onToggleBlackout={handleToggleBlackout}
-              />
-            )}
-          </div>
-        </div>
+          {/* Right Area: Integrated Sidebar (Cardless) */}
+          <aside className="sidebar-pane">
+            {/* Active Disaster Incidents */}
+            <AlertCenter
+              alerts={alerts}
+              onExecuteAction={handleAlertAction}
+              onOpenWhatsApp={(incidentId) => {
+                setTargetIncidentId(incidentId);
+                setShowWhatsAppModal(true);
+              }}
+            />
 
-        {/* Right Area: Integrated Sidebar (Cardless) */}
-        <aside className="sidebar-pane">
-          {/* Active Disaster Incidents */}
-          <AlertCenter
+            {/* Selected Node Live Telemetry & AI Forecast */}
+            <TelemetryPanel
+              node={selectedNode}
+              history={nodeHistory}
+              aiForecast={aiForecast}
+            />
+          </aside>
+        </main>
+      ) : (
+        <main style={{ flex: '1 0 auto', background: '#f8fafc' }}>
+          <CitizenView
             alerts={alerts}
-            onExecuteAction={handleAlertAction}
-            onOpenWhatsApp={(incidentId) => {
-              setTargetIncidentId(incidentId);
+            shelters={shelters}
+            onOpenWhatsApp={() => {
+              setTargetIncidentId(null);
               setShowWhatsAppModal(true);
             }}
           />
+        </main>
+      )}
 
-          {/* Selected Node Live Telemetry & AI Forecast */}
-          <TelemetryPanel
-            node={selectedNode}
-            history={nodeHistory}
-            aiForecast={aiForecast}
-          />
-        </aside>
-      </main>
+      {/* Official Government of India & NDMA Sachet Deep Black Footer */}
+      <GovernmentFooter />
 
       {/* Interactive Modals */}
       <WhatsAppBotModal

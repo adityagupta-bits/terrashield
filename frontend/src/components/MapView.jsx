@@ -27,10 +27,10 @@ export default function MapView({
       attributionControl: false
     });
 
-    // CartoDB Positron Light Tiles for clean, high-contrast, modern map
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19,
-      subdomains: 'abcd',
+    // Esri Light Gray Canvas for clean, high-contrast, watermark-free modern GIS
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 16,
+      attribution: 'Esri, HERE, Garmin'
     }).addTo(map);
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -41,6 +41,11 @@ export default function MapView({
     markersLayerRef.current = L.layerGroup().addTo(map);
 
     mapInstanceRef.current = map;
+    setTimeout(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    }, 250);
 
     return () => {
       map.remove();

@@ -53,10 +53,7 @@ async def take_alert_action(alert_id: int, request: AlertActionRequest, db: Sess
 @router.get("/shelters", response_model=List[SafeShelterResponse])
 def get_safe_shelters(db: Session = Depends(get_db)):
     """Lists safe evacuation shelters, relief camps, and emergency hospitals."""
-    shelters = db.query(SafeShelter).filter(SafeShelter.category.in_(["SHELTER", "RESCUE", "MEDICAL"])).all()
-    if not shelters:
-        shelters = db.query(SafeShelter).all()
-    return shelters
+    return db.query(SafeShelter).all()
 
 @router.get("/citizen-check", response_model=dict)
 def check_citizen_status(

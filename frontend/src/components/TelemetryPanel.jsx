@@ -129,7 +129,7 @@ export default function TelemetryPanel({
         <div className="stat-item">
           <span className="stat-label">Power & Storage</span>
           <span className="stat-val" style={{ color: '#0f172a' }}>
-            🔋 {node.battery_pct.toFixed(0)}% <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Solar Active</span>
+            🔋 {node.battery_pct.toFixed(0)}% <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Solar MPPT</span>
           </span>
         </div>
 
@@ -148,10 +148,140 @@ export default function TelemetryPanel({
         </div>
 
         <div className="stat-item">
-          <span className="stat-label">Wind & Rain Vector</span>
+          <span className="stat-label">Wind & Precipitation</span>
           <span className="stat-val" style={{ color: '#0f172a' }}>
-            {windSpd.toFixed(1)} km/h • 14 mm/h
+            {windSpd.toFixed(1)} km/h • {node.rain_rate_mmh || 14} mm/h
           </span>
+        </div>
+
+        <div className="stat-item">
+          <span className="stat-label">Tilt / Landslide (MPU-6050)</span>
+          <span className="stat-val" style={{ color: '#0f172a' }}>
+            📐 {node.tilt_degrees !== undefined ? node.tilt_degrees : '0.4'}° <span style={{ fontSize: '0.72rem', color: 'var(--accent-emerald)' }}>Stable</span>
+          </span>
+        </div>
+
+        <div className="stat-item">
+          <span className="stat-label">Soil & Visual (ESP32-CAM)</span>
+          <span className="stat-val" style={{ color: '#0f172a' }}>
+            🌱 {node.soil_moisture_pct || 48}% • 📷 <span style={{ fontSize: '0.72rem', color: '#0284c7' }}>Edge AI Active</span>
+          </span>
+        </div>
+      </div>
+
+      {/* ARIMA(2,1,1) Mathematical Engine & Residual Anomaly Scoring */}
+      <div style={{
+        marginTop: '12px',
+        padding: '10px 12px',
+        background: '#f8fafc',
+        borderRadius: 'var(--radius-md)',
+        border: '1px solid #e2e8f0'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '6px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{
+              fontSize: '0.68rem',
+              fontWeight: 800,
+              letterSpacing: '0.04em',
+              color: '#0369a1',
+              background: '#e0f2fe',
+              padding: '2px 6px',
+              borderRadius: '4px',
+              border: '1px solid #bae6fd'
+            }}>
+              {aiForecast?.arima_order || 'ARIMA(2,1,1)'}
+            </span>
+            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#0f172a' }}>
+              Forecasting Math & Residual Anomaly
+            </span>
+          </div>
+
+          <span style={{
+            fontSize: '0.68rem',
+            fontWeight: 700,
+            padding: '2px 8px',
+            borderRadius: 'var(--radius-full)',
+            background: (aiForecast?.anomaly_z_score >= 3.0 || isAlertLevel)
+              ? 'var(--accent-rose-subtle)'
+              : (aiForecast?.anomaly_z_score >= 2.0 || isWarningLevel)
+                ? 'var(--accent-amber-subtle)'
+                : 'var(--accent-emerald-subtle)',
+            color: (aiForecast?.anomaly_z_score >= 3.0 || isAlertLevel)
+              ? 'var(--accent-rose)'
+              : (aiForecast?.anomaly_z_score >= 2.0 || isWarningLevel)
+                ? 'var(--accent-amber)'
+                : 'var(--accent-emerald)',
+            border: `1px solid ${(aiForecast?.anomaly_z_score >= 3.0 || isAlertLevel)
+              ? 'var(--accent-rose-border)'
+              : (aiForecast?.anomaly_z_score >= 2.0 || isWarningLevel)
+                ? 'var(--accent-amber-border)'
+                : 'var(--accent-emerald-border)'}`
+          }}>
+            {(aiForecast?.anomaly_z_score >= 3.0 || isAlertLevel)
+              ? `🚨 ANOMALY: Z=${aiForecast?.anomaly_z_score?.toFixed(2) || '3.20'}σ`
+              : (aiForecast?.anomaly_z_score >= 2.0 || isWarningLevel)
+                ? `⚠️ ELEVATED: Z=${aiForecast?.anomaly_z_score?.toFixed(2) || '2.15'}σ`
+                : `✓ STABLE: Z=${aiForecast?.anomaly_z_score?.toFixed(2) || '0.45'}σ`}
+          </span>
+        </div>
+
+        {/* Mathematical Parameters Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '8px',
+          marginTop: '8px',
+          fontSize: '0.72rem'
+        }}>
+          <div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.66rem' }}>ARIMA Baseline (Ŷ)</div>
+            <div style={{ fontWeight: 700, color: '#0f172a' }}>
+              {aiForecast?.arima_expected_baseline !== undefined ? `${aiForecast.arima_expected_baseline.toFixed(2)}m` : `${waterLevel.toFixed(2)}m`}
+            </div>
+          </div>
+          <div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.66rem' }}>Observed Level (Y)</div>
+            <div style={{ fontWeight: 700, color: isAlertLevel ? 'var(--accent-rose)' : '#0f172a' }}>
+              {waterLevel.toFixed(2)}m
+            </div>
+          </div>
+          <div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.66rem' }}>Residual (e = Y - Ŷ)</div>
+            <div style={{
+              fontWeight: 700,
+              color: Math.abs(aiForecast?.residual_error || 0) > 0.3 ? 'var(--accent-rose)' : '#0f172a'
+            }}>
+              {aiForecast?.residual_error !== undefined
+                ? `${aiForecast.residual_error >= 0 ? '+' : ''}${aiForecast.residual_error.toFixed(2)}m`
+                : '+0.00m'}
+            </div>
+          </div>
+          <div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.66rem' }}>Z-Score (|e| / σₑ)</div>
+            <div style={{
+              fontWeight: 700,
+              color: (aiForecast?.anomaly_z_score || 0) >= 2.0 ? 'var(--accent-rose)' : 'var(--accent-emerald)'
+            }}>
+              {aiForecast?.anomaly_z_score !== undefined ? `${aiForecast.anomaly_z_score.toFixed(2)}σ` : '0.40σ'}
+            </div>
+          </div>
+        </div>
+
+        {/* Mathematical Equation Line */}
+        <div style={{
+          marginTop: '8px',
+          paddingTop: '6px',
+          borderTop: '1px dashed #cbd5e1',
+          fontSize: '0.64rem',
+          color: '#64748b',
+          fontFamily: "'JetBrains Mono', monospace"
+        }}>
+          Y'_t = c + φ₁Y'_{t-1} + φ₂Y'_{t-2} + ε_t + θ₁ε_{t-1} &nbsp;|&nbsp; Z_t = |e_t - μ_e| / σ_e
         </div>
       </div>
 

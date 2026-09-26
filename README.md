@@ -101,57 +101,74 @@ cd frontend && npm run build
 
 ---
 
-## 🛠️ 4. Technical Architecture Details
+## 📚 4. Comprehensive Engineering Documentation
+
+To distinguish every subsystem, algorithmic proof, and hardware schematic, comprehensive technical documentation is maintained in the `docs/` directory:
+
+| Document | Focus & Content |
+|---|---|
+| 🥊 [**COMPETITOR_BENCHMARK.md**](file:///c:/Users/ASUS/sih/docs/COMPETITOR_BENCHMARK.md) | **Direct benchmark against TERRA SENTINEL (Team Panchatatva, SIH26178).** Feature matrix, mathematical rigor vs. vague ML, zero-download WhatsApp bot vs. conceptual mobile app, and cost analysis. |
+| 📐 [**MATH_AND_MODELS.md**](file:///c:/Users/ASUS/sih/docs/MATH_AND_MODELS.md) | **The Forecasting Mathematics (ARIMA 2,1,1)**: AutoRegressive ($p=2$), Integrated ($d=1$), Moving Average ($q=1$), and **Residual Anomaly Scoring** ($e_t, Z_t \ge 2.5\sigma$). Detailed rationale for why the Citizen Portal strictly omits simulation triggers. |
+| ⚡ [**HARDWARE_ARCHITECTURE.md**](file:///c:/Users/ASUS/sih/docs/HARDWARE_ARCHITECTURE.md) | **Edge Sensing Payload**: ESP32-S3-CAM visual edge TinyML, MPU-6050 6-DoF landslide tilt/gyro, capacitive soil moisture v1.2, tipping bucket rain gauge, JSN-SR04T waterproof ultrasonic, pinouts, and 123-day power budget. |
+| 📡 [**DECENTRALIZED_MESH_AND_CONSENSUS.md**](file:///c:/Users/ASUS/sih/docs/DECENTRALIZED_MESH_AND_CONSENSUS.md) | **LoRa SX1262 Mesh Protocol**: 32-byte compact binary packet, 61.7ms Time-on-Air, dynamic routing, and Byzantine-Fault-Tolerant ($k$-of-$N$) spatial consensus voting to eliminate false alarms. |
+| 🛡️ [**CITIZEN_VS_COMMAND_PORTAL.md**](file:///c:/Users/ASUS/sih/docs/CITIZEN_VS_COMMAND_PORTAL.md) | **Dual-Portal UX Architecture**: Sachet-inspired bilingual Citizen Portal vs. Watermelon UI Gridline EOC Command Center; NDMA guidelines and crisis human factors. |
+| 🔌 [**node_payload.md**](file:///c:/Users/ASUS/sih/docs/node_payload.md) | REST API ingestion specification, authentication tokens, batch store-and-forward flushing, and JSON schema definitions. |
+
+---
+
+## 🛠️ 5. Technical Architecture Directory Tree
 
 ```
 sih/
 ├── backend/
 │   ├── app/
 │   │   ├── main.py                  # FastAPI app, /api/v1 routes, WebSocket /ws/live
+│   │   ├── ai_engine.py             # Closed-form ARIMA(2,1,1) & Residual Anomaly Z-Score
 │   │   ├── auth/                    # JWT tokens & SHA-256 node API key validation
 │   │   ├── db/session.py            # PostgreSQL 15 + PostGIS / SQLite spatial engine
 │   │   ├── models/                  # SQLAlchemy 2 models (Node, Reading, Alert, etc.)
-│   │   ├── routers/v1/              # Ingest, Nodes, Alerts, Broadcast, Contacts, Weather
-│   │   └── schemas/                 # Pydantic v2 validated schemas
+│   │   ├── routers/                 # Telemetry, Nodes, Alerts, WhatsApp, Simulation
+│   │   └── schemas/                 # Pydantic v2 validated schemas with ARIMA fields
 │   ├── alembic/                     # Database schema migrations
-│   ├── scripts/
-│   │   ├── seed.py                  # Seed 20 nodes, 21 contacts, 3 hazard zones
-│   │   └── train_weather_model.py   # Scikit-learn GradientBoosting 72h forecast
+│   ├── scripts/                     # Seed data & model training
 │   ├── docker-compose.yml           # PostGIS 15 production container
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
-│   │   ├── api/client.ts            # Typed API client with JWT interceptor
-│   │   ├── components/              # MapView, NodeDetailDrawer, DemoControlDock, etc.
-│   │   ├── hooks/                   # useWebSocket with backoff, useData React Query
+│   │   ├── components/              # TelemetryPanel, MapView, CitizenView, Navbar
+│   │   ├── index.css                # Watermelon UI Gridline design system (Plus Jakarta Sans)
 │   │   ├── i18n/                    # English and Hindi dictionary files
-│   │   ├── pages/                   # Dashboard, Alerts, Broadcast, Contacts, Weather, News, CitizenPortal, Login
+│   │   ├── pages/                   # Dashboard, Alerts, Broadcast, CitizenPortal
 │   │   └── store/                   # Zustand UI & Auth state stores
 │   ├── package.json
 │   └── tailwind.config.ts
 ├── hardware/
-│   ├── esp32_firmware/
-│   │   ├── esp32_firmware.ino       # ESP32 C++ firmware with LittleFS store-and-forward
-│   │   └── config.h.example         # Hardware pinouts and API key configuration
+│   ├── esp32_firmware/              # ESP32 C++ firmware with LittleFS store-and-forward
 │   ├── wokwi/diagram.json           # Virtual ESP32 circuit diagram
-│   └── README.md
+│   └── README.md                    # Hardware BOM & wiring guide
+├── docs/
+│   ├── COMPETITOR_BENCHMARK.md      # Direct comparison vs Terra Sentinel (SIH26178)
+│   ├── MATH_AND_MODELS.md           # Mathematical ARIMA & Residual Anomaly formulations
+│   ├── HARDWARE_ARCHITECTURE.md     # Multi-hazard sensor payload & power calculations
+│   ├── DECENTRALIZED_MESH_AND_CONSENSUS.md # LoRa mesh & BFT consensus algorithm
+│   ├── CITIZEN_VS_COMMAND_PORTAL.md # Sachet Citizen vs EOC Command Center analysis
+│   └── node_payload.md              # Ingestion API specification
 ├── simulator/
 │   └── iot_mesh_simulator.py        # 20-node mesh simulator with CLI flags
-├── docs/
-│   └── node_payload.md              # Ingestion API specification
 └── start_all.bat                    # One-click launch script
 ```
 
 ---
 
-## 🏆 5. SIH Innovation & Impact Checklist
+## 🏆 6. SIH Innovation & Impact Checklist
 
-| Feature Required by SIH26178 | TERRA SHIELD Solution |
-|---|---|
-| **Resilient Infrastructure** | Multi-hop decentralized ESP-NOW / LoRa mesh network; keeps transmitting even when cellular towers fail. |
-| **Edge AI & Localized Intelligence** | On-device ESP32 rapid surge detection (< 5ms) + Cloud Scikit-learn 72-hour precipitation forecast. |
-| **LittleFS Store-and-Forward** | Automatic on-chip flash buffering during network severance with delayed-outage audit trail. |
-| **Multiple Hazards in Unified System**| Simultaneous monitoring of Floods (ultrasonic), Wildfires (ambient heat index + wind), and Air Quality (PM2.5/PM10). |
-| **Targeted Early Warning** | PostGIS `ST_DWithin` spatial calculation for cell broadcasts, avoiding panic and spam. |
-| **Human-as-a-Sensor** | Vernacular WhatsApp chatbot querying Gram Panchayat Sarpanches to confirm ground reality before costly NDRF dispatch. |
-| **Swadeshi Ultra-Low-Cost Hardware** | Indigenous open-source ESP32 nodes costing only ~₹1,850 ($22), over 95% cheaper than imported stations. |
+| Feature Required by SIH26178 | Competitor (TERRA SENTINEL) | TERRA SHIELD Superior Solution |
+|---|---|---|
+| **Predictive Forecasting** | Vague *"AI/ML techniques"* | **Closed-form ARIMA(2,1,1)** modeling AutoRegressive momentum, stationarity differencing, and Moving Average error decay. |
+| **Anomaly Verification** | Naive single threshold | **Standardized Residual Anomaly Scoring** ($e_t = Y_{actual} - \hat{Y}_{arima}$, $Z_t = \frac{\|e_t\|}{\sigma_e} \ge 2.5\sigma$). |
+| **False-Alarm Mitigation** | Unspecified neighbor check | **Byzantine-Fault-Tolerant Spatial Consensus**: $k$-of-$N$ topological catchment voting with rate-of-rise correlation. |
+| **Resilient Mesh Comms** | Point-to-point LoRa | **Dynamic Multi-Hop LoRa SX1262 Mesh** with autonomous routing and offline store-and-forward LittleFS buffer. |
+| **Multiple Hazard Coverage** | Standard sensor array | **Multi-hazard sensing**: Floods (JSN-SR04T), Landslides (MPU-6050 6-DoF + Soil), Wildfires (DHT22 + MQ-135), and Visual (ESP32-S3-CAM). |
+| **Community Alert Delivery** | Proposed mobile app (requires download) | **Zero-Download WhatsApp Bot** (500M+ users ready, works on 2G, native location pins, bilingual menus). |
+| **Human Ground Truth** | Automated machine alerts only | **Gram Panchayat Sarpanch WhatsApp Loop** verifying field ground truth via NLP before dispatching costly NDRF teams. |
+| **Swadeshi Cost Feasibility** | Uncalibrated imports | **Indigenous BOM costing ~₹2,470 ($29 USD)**, 22% cheaper with higher sensor fidelity. |

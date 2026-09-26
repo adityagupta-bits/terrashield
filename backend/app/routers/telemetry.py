@@ -230,6 +230,16 @@ def get_ai_forecast(node_id: str, db: Session = Depends(get_db)):
         .first()
     )
 
+    # Query recent historical water levels for ARIMA(2,1,1) fit
+    history_records = (
+        db.query(TelemetryRecord)
+        .filter(TelemetryRecord.node_id == node_id)
+        .order_by(desc(TelemetryRecord.timestamp))
+        .limit(10)
+        .all()
+    )
+    history_water = [r.water_level_m for r in reversed(history_records) if r.water_level_m is not None]
+
     current_water = latest.water_level_m if latest and latest.water_level_m is not None else 1.8
     current_roc = latest.water_rate_of_change if latest and latest.water_rate_of_change is not None else 0.1
     current_temp = latest.temperature_c if latest and latest.temperature_c is not None else 28.0
@@ -237,7 +247,11 @@ def get_ai_forecast(node_id: str, db: Session = Depends(get_db)):
     current_wind = latest.wind_speed_kmh if latest and latest.wind_speed_kmh is not None else 12.0
     current_pm25 = latest.pm25 if latest and latest.pm25 is not None else 45.0
 
-    flood_analysis = ai_engine.forecast_flood(current_water, current_roc)
+    flood_analysis = ai_engine.forecast_flood(
+        current_water_level=current_water,
+        rate_of_change_30m=current_roc,
+        history_values=history_water if len(history_water) >= 4 else None
+    )
     fire_analysis = ai_engine.calculate_wildfire_spread(
         lat=node.latitude,
         lon=node.longitude,
@@ -257,5 +271,11 @@ def get_ai_forecast(node_id: str, db: Session = Depends(get_db)):
         flood_forecast_3h=flood_analysis["forecast_points"],
         fire_spread_vector=fire_analysis,
         aqi_smog_window_hours=aqi_analysis["window_hours"],
-        ai_summary=summary
+        ai_summary=summary,
+        arima_order=flood_analysis.get("arima_order", "ARIMA(2,1,1)"),
+        arima_expected_baseline=flood_analysis.get("expected_baseline"),
+        residual_error=flood_analysis.get("residual_error"),
+        anomaly_z_score=flood_analysis.get("anomaly_z_score"),
+        is_residual_anomaly=flood_analysis.get("is_anomaly", False),
+        residual_status=flood_analysis.get("decision", "NORMAL")
     )

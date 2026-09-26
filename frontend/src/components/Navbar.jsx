@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Shield, Radio, AlertTriangle, MessageSquare, Smartphone, Zap, Play, ChevronDown, Waves, Flame, Wind, RotateCcw } from 'lucide-react';
+import { Shield, Radio, AlertTriangle, MessageSquare, Smartphone, Zap, Play, ChevronDown, Waves, Flame, Wind, RotateCcw, Activity } from 'lucide-react';
 import { triggerSimulationScenario } from '../services/api';
 
 export default function Navbar({
@@ -10,7 +10,9 @@ export default function Navbar({
   onOpenCitizenPortal,
   onToggleBlackout,
   blackoutActive,
-  onScenarioTriggered
+  onScenarioTriggered,
+  currentView = 'ADMIN',
+  onToggleView
 }) {
   const [scenarioMenuOpen, setScenarioMenuOpen] = useState(false);
   const [simLoading, setSimLoading] = useState(false);
@@ -45,217 +47,173 @@ export default function Navbar({
   };
 
   return (
-    <header className="navbar">
-      {/* Brand Section */}
-      <div className="brand-section">
-        <div className="brand-icon">
-          <Shield size={20} />
-        </div>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span className="brand-title">TERRA SHIELD</span>
-            <span className="brand-badge">SIH26178</span>
+    <div className="wm-nav-wrapper">
+      {/* Sleek Alert Ribbon (Watermelon Gridline Inspiration) */}
+      <div className={`wm-alert-ribbon ${threatSeverity.toLowerCase()}`}>
+        <div className="wm-ribbon-inner">
+          <div className="wm-ribbon-tag">
+            <span className="wm-tag-dot" />
+            <span>{threatSeverity === 'EMERGENCY' ? 'CRITICAL ALERT' : (threatSeverity === 'CAUTION' ? 'ELEVATED WATCH' : 'SYSTEM OPTIMAL')}</span>
           </div>
-          <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-            Resilient AI Environmental Monitoring & Mesh Network
+          <div className="wm-ribbon-message">
+            {threatSeverity === 'EMERGENCY' ? (
+              <span>
+                <strong>Flash Flood Warning:</strong> Upstream surge (+1.92m) detected in Shivpuri-Byasi Sector. Evacuation advisory in effect. Emergency Helplines: <strong>112</strong> / <strong>1070</strong>.
+              </span>
+            ) : threatSeverity === 'CAUTION' ? (
+              <span>
+                <strong>Hydrological Watch:</strong> Moderate rainfall across Garhwal basin. River telemetry active.
+              </span>
+            ) : (
+              <span>
+                <strong>All 20 Catchment Nodes Normal:</strong> Ganga-Chandrabhaga basin telemetry operational. Zero packet loss.
+              </span>
+            )}
+          </div>
+          <div className="wm-ribbon-meta">
+            <span>Garhwal Basin</span>
+            <span className="wm-meta-sep">•</span>
+            <span>20 Nodes</span>
           </div>
         </div>
       </div>
 
-      {/* Telemetry & Network Status */}
-      <div className="nav-stats">
-        {/* WebSocket Real-time Status */}
-        <div className="status-pill">
-          <span className={`status-indicator ${wsConnected ? 'online' : 'emergency'}`} />
-          <span style={{ color: wsConnected ? 'var(--accent-emerald)' : 'var(--accent-rose)' }}>
-            {wsConnected ? 'Telemetry Live' : 'Connecting...'}
-          </span>
+      {/* Main Gridline Header Bar */}
+      <header className="wm-navbar">
+        {/* Left: Brand Lockup */}
+        <div className="wm-brand">
+          <div className="wm-brand-icon">
+            <Shield size={17} strokeWidth={2.2} />
+          </div>
+          <div className="wm-brand-text">
+            <span className="wm-brand-title">TERRA SHIELD</span>
+            <span className="wm-brand-badge">SIH26178</span>
+          </div>
         </div>
 
-        {/* Network Mode Status */}
-        <button
-          onClick={onToggleBlackout}
-          className="status-pill"
-          style={{
-            cursor: 'pointer',
-            borderColor: blackoutActive ? 'var(--accent-amber)' : 'var(--border-subtle)',
-            background: blackoutActive ? 'var(--accent-amber-subtle)' : '#ffffff'
-          }}
-          title="Click to toggle cellular infrastructure blackout"
-        >
-          <Radio size={13} color={blackoutActive ? 'var(--accent-amber)' : 'var(--accent-primary)'} />
-          <span style={{ color: blackoutActive ? 'var(--accent-amber)' : 'var(--text-primary)' }}>
-            {blackoutActive ? 'Mesh Failover (Cellular Cut)' : 'Hybrid Cellular Uplink'}
-          </span>
-        </button>
-
-        {/* Threat Level */}
-        <div
-          className="status-pill"
-          style={{
-            background: threatSeverity === 'EMERGENCY' ? 'var(--accent-rose-subtle)' : (threatSeverity === 'CAUTION' ? 'var(--accent-amber-subtle)' : '#ffffff'),
-            borderColor: threatSeverity === 'EMERGENCY' ? 'var(--accent-rose-border)' : 'var(--border-subtle)'
-          }}
-        >
-          <AlertTriangle
-            size={13}
-            color={threatSeverity === 'EMERGENCY' ? 'var(--accent-rose)' : (threatSeverity === 'CAUTION' ? 'var(--accent-amber)' : 'var(--accent-emerald)')}
-          />
-          <span>Status: </span>
-          <strong
-            style={{
-              color: threatSeverity === 'EMERGENCY' ? 'var(--accent-rose)' : (threatSeverity === 'CAUTION' ? 'var(--accent-amber)' : 'var(--accent-emerald)')
-            }}
-          >
-            {threatSeverity} ({activeAlertsCount})
-          </strong>
-        </div>
-      </div>
-
-      {/* Action Buttons & Scenario Simulator Dropdown */}
-      <div className="nav-actions">
-        {/* Scenario Simulator Dropdown (Clean, Cardless Alternative to Bottom Dock) */}
-        <div style={{ position: 'relative' }} ref={dropdownRef}>
+        {/* Center: Modern Segmented Switcher (Clean, Precision Rectangles) */}
+        <div className="wm-segmented-control">
           <button
-            className="btn btn-outline"
-            onClick={() => setScenarioMenuOpen(!scenarioMenuOpen)}
-            disabled={simLoading}
-            style={{ fontSize: '0.8rem', padding: '6px 12px' }}
+            className={`wm-segment-btn ${currentView === 'ADMIN' ? 'active' : ''}`}
+            onClick={() => onToggleView && onToggleView('ADMIN')}
           >
-            <Play size={13} color="var(--accent-primary)" />
-            <span>{simLoading ? 'Simulating...' : 'Simulate Scenarios'}</span>
-            <ChevronDown size={13} />
+            <Activity size={13} strokeWidth={2} />
+            <span>Command Center</span>
           </button>
+          <button
+            className={`wm-segment-btn ${currentView === 'USER' ? 'active' : ''}`}
+            onClick={() => onToggleView && onToggleView('USER')}
+          >
+            <Smartphone size={13} strokeWidth={2} />
+            <span>Citizen Portal</span>
+          </button>
+        </div>
 
-          {scenarioMenuOpen && (
-            <div style={{
-              position: 'absolute',
-              top: 'calc(100% + 6px)',
-              right: 0,
-              width: '240px',
-              background: '#ffffff',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius-md)',
-              boxShadow: 'var(--shadow-lg)',
-              zIndex: 1100,
-              padding: '6px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '2px'
-            }}>
-              <div style={{
-                fontSize: '0.68rem',
-                fontWeight: 700,
-                color: 'var(--text-muted)',
-                padding: '6px 10px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em'
-              }}>
-                Disaster Injections
+        {/* Right: Technical Badges & Controls */}
+        <div className="wm-nav-right">
+          {/* Telemetry WebSocket Status */}
+          <div className="wm-tech-badge">
+            <span className={`wm-status-dot ${wsConnected ? 'live' : 'offline'}`} />
+            <span className="wm-tech-label">{wsConnected ? 'Telemetry Live' : 'Reconnecting'}</span>
+          </div>
+
+          {currentView === 'ADMIN' ? (
+            <>
+              {/* Network Routing Mode (Admin Command Center Only) */}
+              <button
+                onClick={onToggleBlackout}
+                className={`wm-tech-badge clickable ${blackoutActive ? 'blackout' : ''}`}
+                title="Toggle Cellular Blackout / LoRa Mesh Failover"
+              >
+                <Radio size={12} strokeWidth={2.2} />
+                <span className="wm-tech-label">
+                  {blackoutActive ? 'LoRa Mesh Failover' : 'Hybrid GSM'}
+                </span>
+              </button>
+
+              {/* Scenario Simulation Trigger (Admin Command Center Only) */}
+              <div className="wm-dropdown-anchor" ref={dropdownRef}>
+                <button
+                  className="wm-btn-dark"
+                  onClick={() => setScenarioMenuOpen(!scenarioMenuOpen)}
+                  disabled={simLoading}
+                  title="Inject Disaster Simulation Scenarios (EOC Operators Only)"
+                >
+                  <Play size={11} fill="currentColor" />
+                  <span>{simLoading ? 'Simulating...' : 'Simulate'}</span>
+                  <ChevronDown size={12} />
+                </button>
+
+                {scenarioMenuOpen && (
+                  <div className="wm-dropdown-menu">
+                    <div className="wm-dropdown-title">Disaster Injections</div>
+
+                    <button onClick={() => handleScenario('FLASH_FLOOD')} className="wm-dropdown-action">
+                      <Waves size={14} className="text-sky-500" />
+                      <div>
+                        <div className="wm-action-head">Flash Flood Surge</div>
+                        <div className="wm-action-sub">+1.92m spike in Shivpuri</div>
+                      </div>
+                    </button>
+
+                    <button onClick={() => handleScenario('WILDFIRE')} className="wm-dropdown-action">
+                      <Flame size={14} className="text-orange-500" />
+                      <div>
+                        <div className="wm-action-head">Wildfire Hotspot</div>
+                        <div className="wm-action-sub">44°C heatwave in Chilla</div>
+                      </div>
+                    </button>
+
+                    <button onClick={() => handleScenario('POLLUTION_SPIKE')} className="wm-dropdown-action">
+                      <Wind size={14} className="text-purple-500" />
+                      <div>
+                        <div className="wm-action-head">Severe AQI Smog</div>
+                        <div className="wm-action-sub">PM2.5 spike (345 ug/m3)</div>
+                      </div>
+                    </button>
+
+                    <div className="wm-dropdown-line" />
+
+                    <button onClick={() => handleScenario('CELLULAR_BLACKOUT')} className="wm-dropdown-action">
+                      <Zap size={14} className="text-amber-500" />
+                      <div>
+                        <div className="wm-action-head">Cellular Blackout</div>
+                        <div className="wm-action-sub">Decentralized LoRa routing</div>
+                      </div>
+                    </button>
+
+                    <button onClick={() => handleScenario('RESET')} className="wm-dropdown-action">
+                      <RotateCcw size={14} className="text-zinc-400" />
+                      <div>
+                        <div className="wm-action-head">Reset Baseline</div>
+                        <div className="wm-action-sub">Restore all river levels</div>
+                      </div>
+                    </button>
+                  </div>
+                )}
               </div>
 
-              <button
-                onClick={() => handleScenario('FLASH_FLOOD')}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
-                  background: 'transparent', border: 'none', borderRadius: '6px',
-                  cursor: 'pointer', textAlign: 'left', fontSize: '0.78rem', color: '#0f172a'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-              >
-                <Waves size={14} color="#0284c7" />
-                <div>
-                  <div style={{ fontWeight: 600 }}>Flash Flood Surge</div>
-                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>+1.9m spike in Shivpuri</div>
-                </div>
+              {/* Sarpanch WhatsApp Trigger */}
+              <button className="wm-btn-outline" onClick={onOpenWhatsApp} title="Launch Ground Truth Verification Bot">
+                <MessageSquare size={13} className="text-emerald-600" />
+                <span>WhatsApp Bot</span>
               </button>
+            </>
+          ) : (
+            <>
+              {/* Citizen-Facing Public Safety Controls (No Admin Simulation Buttons) */}
+              <div className="wm-tech-badge" style={{ color: '#dc2626', borderColor: '#fecaca', background: '#fef2f2' }}>
+                <span style={{ fontWeight: 700 }}>24x7 SOS: 112 / 1070</span>
+              </div>
 
-              <button
-                onClick={() => handleScenario('WILDFIRE')}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
-                  background: 'transparent', border: 'none', borderRadius: '6px',
-                  cursor: 'pointer', textAlign: 'left', fontSize: '0.78rem', color: '#0f172a'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-              >
-                <Flame size={14} color="#ea580c" />
-                <div>
-                  <div style={{ fontWeight: 600 }}>Wildfire Ridge Flare</div>
-                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>44°C heat & wind in Chilla</div>
-                </div>
+              <button className="wm-btn-outline" onClick={onOpenWhatsApp} title="Citizen WhatsApp Helpline">
+                <MessageSquare size={13} className="text-emerald-600" />
+                <span>WhatsApp Helpdesk</span>
               </button>
-
-              <button
-                onClick={() => handleScenario('POLLUTION_SPIKE')}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
-                  background: 'transparent', border: 'none', borderRadius: '6px',
-                  cursor: 'pointer', textAlign: 'left', fontSize: '0.78rem', color: '#0f172a'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-              >
-                <Wind size={14} color="#7c3aed" />
-                <div>
-                  <div style={{ fontWeight: 600 }}>AQI Smog Surge</div>
-                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Severe PM2.5 in Industrial zone</div>
-                </div>
-              </button>
-
-              <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '4px 0' }} />
-
-              <button
-                onClick={() => handleScenario('CELLULAR_BLACKOUT')}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
-                  background: 'transparent', border: 'none', borderRadius: '6px',
-                  cursor: 'pointer', textAlign: 'left', fontSize: '0.78rem', color: '#0f172a'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-              >
-                <Zap size={14} color="#d97706" />
-                <div>
-                  <div style={{ fontWeight: 600 }}>Cellular Blackout</div>
-                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Force offline LoRa mesh route</div>
-                </div>
-              </button>
-
-              <button
-                onClick={() => handleScenario('RESET')}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
-                  background: 'transparent', border: 'none', borderRadius: '6px',
-                  cursor: 'pointer', textAlign: 'left', fontSize: '0.78rem', color: '#0f172a'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-              >
-                <RotateCcw size={14} color="#64748b" />
-                <div>
-                  <div style={{ fontWeight: 600 }}>Reset Baseline</div>
-                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Restore safe thresholds</div>
-                </div>
-              </button>
-            </div>
+            </>
           )}
         </div>
-
-        {/* WhatsApp Sarpanch Bot Modal */}
-        <button className="btn btn-whatsapp" onClick={onOpenWhatsApp}>
-          <MessageSquare size={14} />
-          <span>Sarpanch WhatsApp</span>
-        </button>
-
-        {/* Citizen Portal Modal */}
-        <button className="btn btn-primary" onClick={onOpenCitizenPortal}>
-          <Smartphone size={14} />
-          <span>Citizen Portal</span>
-        </button>
-      </div>
-    </header>
+      </header>
+    </div>
   );
 }

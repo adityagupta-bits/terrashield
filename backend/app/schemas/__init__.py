@@ -144,6 +144,13 @@ class AIPredictionResponse(BaseModel):
     fire_spread_vector: Optional[FireSpreadVector] = None
     aqi_smog_window_hours: Optional[float] = None
     ai_summary: str
+    # ARIMA (p, d, q) & Residual Anomaly Scoring Extensions
+    arima_order: str = "ARIMA(2,1,1)"
+    arima_expected_baseline: Optional[float] = None
+    residual_error: Optional[float] = None
+    anomaly_z_score: Optional[float] = None
+    is_residual_anomaly: Optional[bool] = False
+    residual_status: Optional[str] = "NORMAL"
 
 # Simulation Schemas
 class SimulationTriggerRequest(BaseModel):

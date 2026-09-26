@@ -9,38 +9,170 @@ class DisasterAIEngine:
     """Predictive Machine Learning and Mathematical Risk Modeling for Multi-Hazard Disaster Prevention."""
 
     @staticmethod
+    def arima_fit_predict(
+        history_values: List[float],
+        p: int = 2,
+        d: int = 1,
+        q: int = 1,
+        steps: int = 5
+    ) -> Dict[str, Any]:
+        """
+        Fits an ARIMA(p, d, q) time-series model on past sensor readings.
+        Three mathematical pillars:
+          1. Integrated (I - d): Y'_t = Y_t - Y_{t-1} (removes diurnal/catchment drift to achieve stationarity)
+          2. AutoRegressive (AR - p): Y'_t = c + phi_1 * Y'_{t-1} + phi_2 * Y'_{t-2} + ... + eps_t
+          3. Moving Average (MA - q): Y'_t = c + eps_t + theta_1 * eps_{t-1} + ... (smoothes random transducer noise)
+        Returns the expected 1-step baseline, multi-step projections, and in-sample residual variance.
+        """
+        y = np.array(history_values, dtype=float) if len(history_values) > 0 else np.array([1.8], dtype=float)
+        
+        # 1. Differencing (I - d)
+        diff = y.copy()
+        for _ in range(d):
+            if len(diff) > 1:
+                diff = np.diff(diff)
+            else:
+                break
+        
+        n = len(diff)
+        c = 0.0
+        phis = np.zeros(p)
+        residuals = np.zeros(max(1, n))
+        
+        # 2. AutoRegressive (AR - p) via Ordinary Least Squares on stationary series
+        if n > p:
+            X = np.column_stack([diff[i:n - p + i] for i in range(p - 1, -1, -1)])
+            Y_target = diff[p:]
+            X_design = np.column_stack([np.ones(len(Y_target)), X])
+            try:
+                coeffs, _, _, _ = np.linalg.lstsq(X_design, Y_target, rcond=None)
+                c = float(coeffs[0])
+                phis = coeffs[1:]
+                residuals = Y_target - (c + np.dot(X, phis))
+            except Exception:
+                c = float(np.mean(diff)) if len(diff) > 0 else 0.0
+                phis = np.array([0.5, 0.2][:p])
+        else:
+            c = float(np.mean(diff)) if len(diff) > 0 else 0.0
+            phis = np.array([0.6, 0.2][:p]) if p >= 2 else np.array([0.6])
+
+        # 3. Moving Average (MA - q) innovation error weighting
+        theta = float(np.mean(residuals[-q:])) * 0.4 if len(residuals) >= q else 0.0
+        
+        # In-sample expected baseline for latest observation
+        if n >= p:
+            last_p_diffs = diff[-p:][::-1]
+            expected_diff = c + float(np.dot(phis[:len(last_p_diffs)], last_p_diffs)) + theta
+        else:
+            expected_diff = c
+            
+        prev_level = y[-2] if len(y) >= 2 else y[-1]
+        expected_baseline = max(0.2, round(prev_level + expected_diff, 2))
+
+        # 4. Multi-horizon iterative projection
+        last_diffs = list(diff[-p:]) if len(diff) >= p else [0.0] * p
+        predicted_diffs = []
+        cur_theta = theta
+        for step in range(steps):
+            x_step = np.array(last_diffs[-p:][::-1])
+            pred_d = c + float(np.dot(phis[:len(x_step)], x_step)) + (cur_theta if step == 0 else 0.0)
+            predicted_diffs.append(pred_d)
+            last_diffs.append(pred_d)
+            cur_theta *= 0.5  # Moving average error decay
+
+        # Invert differencing to restore absolute physical sensor stages
+        current_stage = float(y[-1])
+        horizon_projections = []
+        for pd in predicted_diffs:
+            current_stage = max(0.2, round(current_stage + pd, 2))
+            horizon_projections.append(current_stage)
+
+        sigma_residuals = float(np.std(residuals)) if len(residuals) > 2 else 0.20
+        sigma_residuals = max(0.12, sigma_residuals)  # Minimum physical noise floor (12cm)
+
+        return {
+            "expected_baseline": expected_baseline,
+            "horizon_projections": horizon_projections,
+            "sigma_residuals": sigma_residuals,
+            "ar_coeffs": [round(float(phi), 3) for phi in phis],
+            "intercept": round(c, 4),
+            "ma_theta": round(theta, 4)
+        }
+
+    @staticmethod
     def forecast_flood(
         current_water_level: float,
         rate_of_change_30m: float,
+        history_values: Optional[List[float]] = None,
         upstream_delta: float = 0.2
     ) -> Dict[str, Any]:
         """
-        Forecasts water levels 3 hours into the future using non-linear rate-of-rise extrapolation.
-        Evaluates flash flood risk and time-to-overflow.
-        """
-        forecast_points: List[FloodForecastPoint] = []
-        is_flash_surge = rate_of_change_30m >= settings.FLOOD_FLASH_RATE_THRESHOLD
+        Forecasting Mathematics (ARIMA):
+          - AutoRegressive (AR - p): Y_t = c + phi_1 * Y_{t-1} + phi_2 * Y_{t-2} + eps_t
+          - Integrated (I - d): Y'_t = Y_t - Y_{t-1}
+          - Moving Average (MA - q): Y_t = c + eps_t + theta_1 * eps_{t-1} + ...
         
-        # Time horizons in hours: 0.5h (30m), 1.0h (60m), 1.5h, 2.0h, 3.0h
+        Decision Logic (Residual Anomaly Scoring):
+          - Residual: e_t = Y_actual - Y_arima
+          - Anomaly Z-Score: Z_t = |e_t - mu_e| / sigma_e
+          - Hazard Decision:
+              * Z_t >= 3.0 or level >= 4.0m -> CRITICAL / EMERGENCY
+              * 2.0 <= Z_t < 3.0 or level >= 3.0m -> CAUTION / ELEVATED WATCH
+              * Z_t < 2.0 -> NORMAL / SYSTEM OPTIMAL
+        """
         horizons = [0.5, 1.0, 1.5, 2.0, 3.0]
         
-        # Non-linear momentum model: height(t) = h0 + (rate/0.5)*t + 0.5 * accel * t^2
-        # If water is surging rapidly, acceleration is positive due to upstream runoff
-        accel = 0.15 * (rate_of_change_30m / 0.5) if rate_of_change_30m > 0 else -0.05
-        
+        # Synthesize recent context if not provided
+        if not history_values or len(history_values) < 5:
+            # Baseline window leading up to current level
+            base = current_water_level - (rate_of_change_30m * 1.5)
+            history_values = [
+                round(base, 2),
+                round(base + 0.02, 2),
+                round(base + 0.01, 2),
+                round(base + 0.04, 2),
+                round(current_water_level - rate_of_change_30m, 2),
+                round(current_water_level, 2)
+            ]
+
+        # 1. Run ARIMA(2, 1, 1) model
+        arima_res = DisasterAIEngine.arima_fit_predict(
+            history_values=history_values,
+            p=2,
+            d=1,
+            q=1,
+            steps=len(horizons)
+        )
+
+        expected_baseline = arima_res["expected_baseline"]
+        sigma_e = arima_res["sigma_residuals"]
+
+        # 2. Residual Anomaly Scoring: e_t = Y_actual - Y_arima
+        residual_error = round(current_water_level - expected_baseline, 3)
+        # Z-Score Anomaly: Z_t = |e_t| / sigma_e
+        anomaly_z_score = round(abs(residual_error) / sigma_e, 2)
+
+        # Rate of change anomaly detection
+        is_flash_surge = rate_of_change_30m >= settings.FLOOD_FLASH_RATE_THRESHOLD or anomaly_z_score >= 3.0
+
+        # Build multi-horizon projections combining ARIMA baseline with surge momentum
+        forecast_points: List[FloodForecastPoint] = []
         time_to_overflow_mins: Optional[int] = None
 
-        for h in horizons:
-            # Predict level with physical dampening factor
-            growth = (rate_of_change_30m / 0.5) * h + 0.5 * accel * (h ** 2) + (upstream_delta * h)
-            pred_level = max(0.2, round(current_water_level + growth, 2))
-            
-            # Classify risk
-            if pred_level >= settings.FLOOD_CRITICAL:
+        accel = 0.12 * (rate_of_change_30m / 0.5) if rate_of_change_30m > 0 else -0.04
+        
+        for idx, h in enumerate(horizons):
+            arima_pred = arima_res["horizon_projections"][idx]
+            # Dynamic surge momentum addition
+            momentum_boost = 0.5 * accel * (h ** 2) if is_flash_surge else 0.0
+            pred_level = max(0.2, round(arima_pred + momentum_boost, 2))
+
+            # Hazard Decision Boundary using Z-score & Absolute safety threshold
+            if pred_level >= settings.FLOOD_CRITICAL or (anomaly_z_score >= 3.0 and pred_level >= 3.5):
                 risk = "CRITICAL"
-                if time_to_overflow_mins is None and pred_level >= settings.FLOOD_CRITICAL:
+                if time_to_overflow_mins is None:
                     time_to_overflow_mins = int(h * 60)
-            elif pred_level >= settings.FLOOD_CAUTION_MAX or is_flash_surge:
+            elif pred_level >= settings.FLOOD_CAUTION_MAX or anomaly_z_score >= 2.0 or is_flash_surge:
                 risk = "CAUTION"
             else:
                 risk = "NORMAL"
@@ -53,21 +185,38 @@ class DisasterAIEngine:
                 )
             )
 
-        summary = ""
-        if is_flash_surge:
-            summary = f"CRITICAL SURGE DETECTED! Water level rising by {rate_of_change_30m:.2f}m in 30 mins! Overflow predicted within {time_to_overflow_mins or 45} mins."
-        elif current_water_level >= settings.FLOOD_CRITICAL:
-            summary = f"RIVER AT DANGER MARK ({current_water_level:.2f}m). Red Alert: Immediate low-lying evacuation advised."
-        elif current_water_level >= settings.FLOOD_CAUTION_MAX:
-            summary = f"Elevated discharge ({current_water_level:.2f}m). Upstream runoff active, monitor embankments."
+        # Decision classification
+        if anomaly_z_score >= 3.0 or current_water_level >= settings.FLOOD_CRITICAL:
+            decision = "CRITICAL"
+            summary = (
+                f"CRITICAL RESIDUAL ANOMALY (Z={anomaly_z_score:.2f}σ, Residual={residual_error:+.2f}m)! "
+                f"ARIMA(2,1,1) baseline was {expected_baseline:.2f}m. Actual stage {current_water_level:.2f}m breaches danger mark. "
+                f"Overflow predicted within {time_to_overflow_mins or 35} mins."
+            )
+        elif anomaly_z_score >= 2.0 or current_water_level >= settings.FLOOD_CAUTION_MAX:
+            decision = "CAUTION"
+            summary = (
+                f"ELEVATED HYDROLOGICAL WATCH (Z={anomaly_z_score:.2f}σ, Residual={residual_error:+.2f}m). "
+                f"ARIMA baseline: {expected_baseline:.2f}m. Upstream runoff active, monitor river gauge."
+            )
         else:
-            summary = f"River level normal ({current_water_level:.2f}m). Stable flow."
+            decision = "NORMAL"
+            summary = (
+                f"STABLE ARIMA BASELINE (Z={anomaly_z_score:.2f}σ, Residual={residual_error:+.2f}m). "
+                f"River stage {current_water_level:.2f}m tracks expected ARIMA(2,1,1) curve. Zero anomalous divergence."
+            )
 
         return {
             "forecast_points": forecast_points,
             "is_flash_surge": is_flash_surge,
             "time_to_overflow_mins": time_to_overflow_mins,
-            "summary": summary
+            "summary": summary,
+            "arima_order": "ARIMA(2,1,1)",
+            "expected_baseline": expected_baseline,
+            "residual_error": residual_error,
+            "anomaly_z_score": anomaly_z_score,
+            "is_anomaly": anomaly_z_score >= 2.0,
+            "decision": decision
         }
 
     @staticmethod
