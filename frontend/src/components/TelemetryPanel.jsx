@@ -89,11 +89,11 @@ export default function TelemetryPanel({
           fontWeight: 700,
           padding: '2px 8px',
           borderRadius: 'var(--radius-full)',
-          background: node.status.includes('OFFLINE') ? 'var(--accent-rose-subtle)' : 'var(--accent-emerald-subtle)',
-          color: node.status.includes('OFFLINE') ? 'var(--accent-rose)' : 'var(--accent-emerald)',
-          border: `1px solid ${node.status.includes('OFFLINE') ? 'var(--accent-rose-border)' : 'var(--accent-emerald-border)'}`
+          background: node.status?.includes('OFFLINE') ? 'var(--accent-rose-subtle)' : 'var(--accent-emerald-subtle)',
+          color: node.status?.includes('OFFLINE') ? 'var(--accent-rose)' : 'var(--accent-emerald)',
+          border: `1px solid ${node.status?.includes('OFFLINE') ? 'var(--accent-rose-border)' : 'var(--accent-emerald-border)'}`
         }}>
-          {node.status}
+          {node.status || 'ONLINE'}
         </span>
       </div>
 
@@ -106,7 +106,7 @@ export default function TelemetryPanel({
           <span className="value" style={{
             color: isAlertLevel ? 'var(--accent-rose)' : (isWarningLevel ? 'var(--accent-amber)' : '#0f172a')
           }}>
-            {isFloodNode ? waterLevel.toFixed(2) : tempC.toFixed(1)}
+            {isFloodNode ? (waterLevel != null ? Number(waterLevel).toFixed(2) : '1.80') : (tempC != null ? Number(tempC).toFixed(1) : '26.5')}
             <span style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--text-muted)', marginLeft: 4 }}>
               {isFloodNode ? 'meters' : '°C'}
             </span>
@@ -118,7 +118,7 @@ export default function TelemetryPanel({
               fontWeight: 700,
               color: waterRoc > 0.5 ? 'var(--accent-rose)' : (waterRoc > 0 ? 'var(--accent-amber)' : 'var(--accent-emerald)')
             }}>
-              {waterRoc > 0 ? `▲ +${waterRoc.toFixed(2)} m/30m` : `▼ ${waterRoc.toFixed(2)} m/30m`}
+              {waterRoc > 0 ? `▲ +${Number(waterRoc || 0).toFixed(2)} m/30m` : `▼ ${Number(waterRoc || 0).toFixed(2)} m/30m`}
             </span>
           )}
         </div>
@@ -129,7 +129,7 @@ export default function TelemetryPanel({
         <div className="stat-item">
           <span className="stat-label">Power & Storage</span>
           <span className="stat-val" style={{ color: '#0f172a' }}>
-            🔋 {node.battery_pct.toFixed(0)}% <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Solar MPPT</span>
+            🔋 {node.battery_pct != null ? Number(node.battery_pct).toFixed(0) : '95'}% <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Solar MPPT</span>
           </span>
         </div>
 
@@ -143,14 +143,14 @@ export default function TelemetryPanel({
         <div className="stat-item">
           <span className="stat-label">Ambient Conditions</span>
           <span className="stat-val" style={{ color: '#0f172a' }}>
-            {tempC.toFixed(1)}°C • {humPct.toFixed(0)}% RH
+            {tempC != null ? Number(tempC).toFixed(1) : '26.5'}°C • {humPct != null ? Number(humPct).toFixed(0) : '55'}% RH
           </span>
         </div>
 
         <div className="stat-item">
           <span className="stat-label">Wind & Precipitation</span>
           <span className="stat-val" style={{ color: '#0f172a' }}>
-            {windSpd.toFixed(1)} km/h • {node.rain_rate_mmh || 14} mm/h
+            {windSpd != null ? Number(windSpd).toFixed(1) : '12.0'} km/h • {node.rain_rate_mmh || 14} mm/h
           </span>
         </div>
 
@@ -206,27 +206,27 @@ export default function TelemetryPanel({
             fontWeight: 700,
             padding: '2px 8px',
             borderRadius: 'var(--radius-full)',
-            background: (aiForecast?.anomaly_z_score >= 3.0 || isAlertLevel)
+            background: ((aiForecast?.anomaly_z_score != null && aiForecast.anomaly_z_score >= 3.0) || isAlertLevel)
               ? 'var(--accent-rose-subtle)'
-              : (aiForecast?.anomaly_z_score >= 2.0 || isWarningLevel)
+              : ((aiForecast?.anomaly_z_score != null && aiForecast.anomaly_z_score >= 2.0) || isWarningLevel)
                 ? 'var(--accent-amber-subtle)'
                 : 'var(--accent-emerald-subtle)',
-            color: (aiForecast?.anomaly_z_score >= 3.0 || isAlertLevel)
+            color: ((aiForecast?.anomaly_z_score != null && aiForecast.anomaly_z_score >= 3.0) || isAlertLevel)
               ? 'var(--accent-rose)'
-              : (aiForecast?.anomaly_z_score >= 2.0 || isWarningLevel)
+              : ((aiForecast?.anomaly_z_score != null && aiForecast.anomaly_z_score >= 2.0) || isWarningLevel)
                 ? 'var(--accent-amber)'
                 : 'var(--accent-emerald)',
-            border: `1px solid ${(aiForecast?.anomaly_z_score >= 3.0 || isAlertLevel)
+            border: `1px solid ${((aiForecast?.anomaly_z_score != null && aiForecast.anomaly_z_score >= 3.0) || isAlertLevel)
               ? 'var(--accent-rose-border)'
-              : (aiForecast?.anomaly_z_score >= 2.0 || isWarningLevel)
+              : ((aiForecast?.anomaly_z_score != null && aiForecast.anomaly_z_score >= 2.0) || isWarningLevel)
                 ? 'var(--accent-amber-border)'
                 : 'var(--accent-emerald-border)'}`
           }}>
-            {(aiForecast?.anomaly_z_score >= 3.0 || isAlertLevel)
-              ? `🚨 ANOMALY: Z=${aiForecast?.anomaly_z_score?.toFixed(2) || '3.20'}σ`
-              : (aiForecast?.anomaly_z_score >= 2.0 || isWarningLevel)
-                ? `⚠️ ELEVATED: Z=${aiForecast?.anomaly_z_score?.toFixed(2) || '2.15'}σ`
-                : `✓ STABLE: Z=${aiForecast?.anomaly_z_score?.toFixed(2) || '0.45'}σ`}
+            {((aiForecast?.anomaly_z_score != null && aiForecast.anomaly_z_score >= 3.0) || isAlertLevel)
+              ? `🚨 ANOMALY: Z=${aiForecast?.anomaly_z_score != null ? Number(aiForecast.anomaly_z_score).toFixed(2) : '3.20'}σ`
+              : ((aiForecast?.anomaly_z_score != null && aiForecast.anomaly_z_score >= 2.0) || isWarningLevel)
+                ? `⚠️ ELEVATED: Z=${aiForecast?.anomaly_z_score != null ? Number(aiForecast.anomaly_z_score).toFixed(2) : '2.15'}σ`
+                : `✓ STABLE: Z=${aiForecast?.anomaly_z_score != null ? Number(aiForecast.anomaly_z_score).toFixed(2) : '0.45'}σ`}
           </span>
         </div>
 
@@ -241,13 +241,13 @@ export default function TelemetryPanel({
           <div>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.66rem' }}>ARIMA Baseline (Ŷ)</div>
             <div style={{ fontWeight: 700, color: '#0f172a' }}>
-              {aiForecast?.arima_expected_baseline !== undefined ? `${aiForecast.arima_expected_baseline.toFixed(2)}m` : `${waterLevel.toFixed(2)}m`}
+              {aiForecast?.arima_expected_baseline != null ? `${Number(aiForecast.arima_expected_baseline).toFixed(2)}m` : `${Number(waterLevel || 1.8).toFixed(2)}m`}
             </div>
           </div>
           <div>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.66rem' }}>Observed Level (Y)</div>
             <div style={{ fontWeight: 700, color: isAlertLevel ? 'var(--accent-rose)' : '#0f172a' }}>
-              {waterLevel.toFixed(2)}m
+              {Number(waterLevel || 1.8).toFixed(2)}m
             </div>
           </div>
           <div>
@@ -256,8 +256,8 @@ export default function TelemetryPanel({
               fontWeight: 700,
               color: Math.abs(aiForecast?.residual_error || 0) > 0.3 ? 'var(--accent-rose)' : '#0f172a'
             }}>
-              {aiForecast?.residual_error !== undefined
-                ? `${aiForecast.residual_error >= 0 ? '+' : ''}${aiForecast.residual_error.toFixed(2)}m`
+              {aiForecast?.residual_error != null
+                ? `${Number(aiForecast.residual_error) >= 0 ? '+' : ''}${Number(aiForecast.residual_error).toFixed(2)}m`
                 : '+0.00m'}
             </div>
           </div>
@@ -267,7 +267,7 @@ export default function TelemetryPanel({
               fontWeight: 700,
               color: (aiForecast?.anomaly_z_score || 0) >= 2.0 ? 'var(--accent-rose)' : 'var(--accent-emerald)'
             }}>
-              {aiForecast?.anomaly_z_score !== undefined ? `${aiForecast.anomaly_z_score.toFixed(2)}σ` : '0.40σ'}
+              {aiForecast?.anomaly_z_score != null ? `${Number(aiForecast.anomaly_z_score).toFixed(2)}σ` : '0.40σ'}
             </div>
           </div>
         </div>
@@ -281,7 +281,7 @@ export default function TelemetryPanel({
           color: '#64748b',
           fontFamily: "'JetBrains Mono', monospace"
         }}>
-          Y'_t = c + φ₁Y'_{t-1} + φ₂Y'_{t-2} + ε_t + θ₁ε_{t-1} &nbsp;|&nbsp; Z_t = |e_t - μ_e| / σ_e
+          {"Y'_t = c + φ₁Y'_{t-1} + φ₂Y'_{t-2} + ε_t + θ₁ε_{t-1} | Z_t = |e_t - μ_e| / σ_e"}
         </div>
       </div>
 

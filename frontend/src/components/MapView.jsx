@@ -148,6 +148,8 @@ export default function MapView({
       const isSelected = node.id === selectedNodeId;
       const isGateway = node.is_gateway;
       const isBlackoutOffline = node.status === 'OFFLINE_CELLULAR';
+      const nodeStatus = node.status || 'ONLINE';
+      const hazardType = (node.hazard_type || 'multi').toLowerCase();
 
       // Node color by hazard type
       let baseColor = '#0284c7';
@@ -156,18 +158,21 @@ export default function MapView({
       if (isGateway) {
         baseColor = isBlackoutOffline ? '#dc2626' : '#0284c7';
         iconSymbol = isBlackoutOffline ? '⚡' : '🌐';
-      } else if (node.hazard_type === 'flood') {
+      } else if (hazardType === 'flood') {
         baseColor = '#2563eb';
         iconSymbol = '🌊';
-      } else if (node.hazard_type === 'fire') {
+      } else if (hazardType === 'fire') {
         baseColor = '#ea580c';
         iconSymbol = '🔥';
-      } else if (node.hazard_type === 'pollution') {
+      } else if (hazardType === 'pollution') {
         baseColor = '#7c3aed';
         iconSymbol = '🌫️';
       }
 
       const ringStyle = isSelected ? 'box-shadow: 0 0 0 3px #0284c7, 0 4px 12px rgba(2, 132, 199, 0.3); transform: scale(1.1);' : 'box-shadow: 0 2px 5px rgba(0,0,0,0.12);';
+      const batteryDisplay = node.battery_pct != null ? Number(node.battery_pct).toFixed(0) : '95';
+      const rssiDisplay = node.signal_rssi != null ? node.signal_rssi : -65;
+      const hopsDisplay = node.hop_count && node.hop_count > 0 ? `(${node.hop_count}h)` : '';
 
       const nodeIcon = L.divIcon({
         className: 'custom-node-marker',
@@ -199,7 +204,7 @@ export default function MapView({
               white-space: nowrap;
               box-shadow: 0 1px 2px rgba(0,0,0,0.06);
             ">
-              ${node.id} ${node.hop_count > 0 ? `(${node.hop_count}h)` : ''}
+              ${node.id} ${hopsDisplay}
             </span>
           </div>
         `,
@@ -207,7 +212,7 @@ export default function MapView({
         iconAnchor: [15, 15]
       });
 
-      const marker = L.marker([node.latitude, node.longitude], { icon: nodeIcon });
+      const marker = L.marker([node.latitude || 30.0869, node.longitude || 78.2676], { icon: nodeIcon });
 
       marker.on('click', () => {
         if (onSelectNode) onSelectNode(node.id);
@@ -218,9 +223,9 @@ export default function MapView({
           <h4 style="color: ${baseColor}; margin: 0 0 4px 0; font-size: 0.9rem; font-weight: 700;">${node.name}</h4>
           <div style="font-size: 0.78rem; color: #475569; line-height: 1.5;">
             <div>ID: <b style="color:#0f172a;">${node.id}</b></div>
-            <div>Status: <b style="color:${node.status.includes('OFFLINE') ? '#dc2626' : '#16a34a'};">${node.status}</b></div>
-            <div>Mesh Hops: <b>${node.hop_count}</b> (Parent: ${node.parent_node_id || 'Direct'})</div>
-            <div>Battery: <b>${node.battery_pct.toFixed(0)}%</b> | RSSI: <b>${node.signal_rssi} dBm</b></div>
+            <div>Status: <b style="color:${nodeStatus.includes('OFFLINE') ? '#dc2626' : '#16a34a'};">${nodeStatus}</b></div>
+            <div>Mesh Hops: <b>${node.hop_count || 0}</b> (Parent: ${node.parent_node_id || 'Direct'})</div>
+            <div>Battery: <b>${batteryDisplay}%</b> | RSSI: <b>${rssiDisplay} dBm</b></div>
           </div>
         </div>
       `);

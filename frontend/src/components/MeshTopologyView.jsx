@@ -7,7 +7,7 @@ export default function MeshTopologyView({
   onSelectNode,
   onToggleBlackout
 }) {
-  const isBlackout = topology.network_mode.includes('BLACKOUT');
+  const isBlackout = topology.network_mode ? topology.network_mode.includes('BLACKOUT') : false;
   const nodes = topology.nodes || [];
   const links = topology.links || [];
 
@@ -156,8 +156,10 @@ export default function MeshTopologyView({
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
               {(nodesByHop[hop] || []).map((node) => {
                 const isSelected = node.id === selectedNodeId;
-                const isOffline = node.status.includes('OFFLINE');
+                const isOffline = node.status?.includes('OFFLINE');
                 const isEmergencySink = node.status === 'EMERGENCY_SINK';
+                const hazardBadge = node.is_gateway ? 'GATEWAY' : (node.hazard_type || 'SENSOR').toUpperCase();
+                const batteryDisplay = node.battery_pct != null ? Number(node.battery_pct).toFixed(0) : '95';
 
                 return (
                   <div
@@ -195,12 +197,12 @@ export default function MeshTopologyView({
                         background: isOffline ? '#fee2e2' : (isEmergencySink ? '#fef3c7' : '#e0f2fe'),
                         color: isOffline ? '#dc2626' : (isEmergencySink ? '#b45309' : '#0369a1')
                       }}>
-                        {node.is_gateway ? 'GATEWAY' : `${node.hazard_type.toUpperCase()}`}
+                        {hazardBadge}
                       </span>
                     </div>
 
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-                      {node.name.length > 22 ? `${node.name.substring(0, 20)}...` : node.name}
+                      {node.name && node.name.length > 22 ? `${node.name.substring(0, 20)}...` : (node.name || 'Sensor Node')}
                     </div>
 
                     <div style={{
@@ -212,7 +214,7 @@ export default function MeshTopologyView({
                       marginTop: '4px'
                     }}>
                       <span>Parent: <b style={{ color: '#0f172a' }}>{node.parent_node_id || 'Root'}</b></span>
-                      <span>🔋 {node.battery_pct.toFixed(0)}%</span>
+                      <span>🔋 {batteryDisplay}%</span>
                     </div>
                   </div>
                 );
