@@ -8,7 +8,13 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.weather import WeatherForecast
-from app.schemas.v1_schemas import WeatherCurrentResponse, WeatherForecastResponse, WeatherForecastPoint
+from app.schemas.v1_schemas import (
+    WeatherCurrentResponse,
+    WeatherForecastResponse,
+    WeatherForecastPoint,
+    MultiHazardRiskResponse
+)
+from app.ai_engine import ai_engine
 
 router = APIRouter(prefix="/weather", tags=["Weather & Forecasting"])
 
@@ -124,3 +130,22 @@ def get_weather_forecast(db: Session = Depends(get_db)):
         points=points,
         note="Forecast based on past weather data"
     )
+
+@router.get("/multi-hazard-risk", response_model=MultiHazardRiskResponse)
+def get_multi_hazard_risk(
+    horizon_days: int = Query(7, ge=1, le=14),
+    lat: float = Query(30.0869),
+    lng: float = Query(78.2676),
+    source: str = Query("auto")
+):
+    """
+    Evaluates multi-hazard disaster risks (Flood, Drought, Wildfire) across meteorological variables
+    using per-variable ARIMA forecasting and explainable threshold rules.
+    """
+    assessment = ai_engine.assess_weather_multi_hazard_risk(
+        horizon_days=horizon_days,
+        lat=lat,
+        lon=lng
+    )
+    return MultiHazardRiskResponse(**assessment)
+

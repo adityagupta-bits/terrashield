@@ -57,6 +57,14 @@ export function useWeatherForecast() {
   });
 }
 
+export function useMultiHazardRisk(horizonDays = 7) {
+  return useQuery({
+    queryKey: ['multi_hazard_risk', horizonDays],
+    queryFn: () => api.getMultiHazardRisk(horizonDays),
+    staleTime: 300000
+  });
+}
+
 export function useNews() {
   return useQuery({
     queryKey: ['news'],

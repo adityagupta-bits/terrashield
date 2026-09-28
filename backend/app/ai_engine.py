@@ -314,4 +314,85 @@ class DisasterAIEngine:
             "window_hours": 3.0 if severity in ["SEVERE", "POOR"] else 0.0
         }
 
+    @staticmethod
+    def assess_weather_multi_hazard_risk(
+        history_df: Optional[Any] = None,
+        horizon_days: int = 7,
+        lat: float = 30.0869,
+        lon: float = 78.2676,
+        csv_path: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Multi-Variable ARIMA Weather Forecasting & Multi-Hazard Risk Assessment (Flood, Drought, Wildfire).
+        Integrated from the Weather Risk Forecaster module.
+        """
+        from app.risk_forecaster import (
+            forecast_all_variables,
+            forecasts_to_dataframe,
+            assess_all,
+            load_history_csv,
+            generate_synthetic_history,
+            clean_and_fill
+        )
+
+        # 1. Load or synthesize historical meteorological data
+        if history_df is None or (hasattr(history_df, "empty") and history_df.empty):
+            try:
+                history_df = load_history_csv(csv_path)
+            except Exception:
+                history_df = generate_synthetic_history(days=365)
+        
+        history_df = clean_and_fill(history_df)
+
+        # 2. Run per-variable ARIMA models
+        forecast_results = forecast_all_variables(history_df, horizon=horizon_days)
+        forecast_df = forecasts_to_dataframe(forecast_results)
+
+        # 3. Assess multi-hazard risk (Flood, Drought, Wildfire)
+        risk_assessments = assess_all(forecast_df)
+
+        # Format dates and daily projections
+        dates = [d.strftime("%Y-%m-%d") for d in forecast_df.index]
+        daily_projections = []
+        for d in forecast_df.index:
+            row = forecast_df.loc[d]
+            daily_projections.append({
+                "date": d.strftime("%Y-%m-%d"),
+                "temp_max": round(float(row.get("temp_max", 0.0)), 1),
+                "temp_min": round(float(row.get("temp_min", 0.0)), 1),
+                "humidity": round(float(row.get("humidity", 0.0)), 1),
+                "precipitation": round(float(row.get("precipitation", 0.0)), 1),
+                "pressure": round(float(row.get("pressure", 1013.0)), 1),
+                "wind_speed": round(float(row.get("wind_speed", 0.0)), 1)
+            })
+
+        risks_dict = {k: v.to_dict() for k, v in risk_assessments.items()}
+        
+        overall_severity = "LOW"
+        triggered_risks = [k for k, v in risk_assessments.items() if v.triggered]
+        max_score = max([v.score for v in risk_assessments.values()]) if risk_assessments else 0.0
+        
+        if max_score >= 0.7 or len(triggered_risks) >= 2:
+            overall_severity = "CRITICAL"
+        elif max_score >= 0.4 or len(triggered_risks) >= 1:
+            overall_severity = "ELEVATED"
+
+        return {
+            "region": "Rishikesh-Garhwal Catchment",
+            "coordinates": {"latitude": lat, "longitude": lon},
+            "horizon_days": horizon_days,
+            "overall_severity": overall_severity,
+            "max_risk_score": max_score,
+            "triggered_hazards": triggered_risks,
+            "dates": dates,
+            "daily_projections": daily_projections,
+            "risks": risks_dict,
+            "model_metadata": {
+                "variables_modeled": list(forecast_results.keys()),
+                "orders": {k: v.order for k, v in forecast_results.items()},
+                "aic_scores": {k: v.aic for k, v in forecast_results.items()}
+            }
+        }
+
 ai_engine = DisasterAIEngine()
+

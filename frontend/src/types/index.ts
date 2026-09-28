@@ -101,6 +101,41 @@ export interface WeatherForecastData {
   note: string;
 }
 
+export interface RiskAssessmentDetails {
+  risk_type: string;
+  triggered: boolean;
+  score: number;
+  reasons: string[];
+}
+
+export interface DailyProjection {
+  date: string;
+  temp_max: number;
+  temp_min: number;
+  humidity: number;
+  precipitation: number;
+  pressure: number;
+  wind_speed: number;
+}
+
+export interface MultiHazardRiskData {
+  region: string;
+  coordinates: { latitude: number; longitude: number };
+  horizon_days: number;
+  overall_severity: 'LOW' | 'ELEVATED' | 'CRITICAL';
+  max_risk_score: number;
+  triggered_hazards: string[];
+  dates: string[];
+  daily_projections: DailyProjection[];
+  risks: {
+    flood: RiskAssessmentDetails;
+    drought: RiskAssessmentDetails;
+    fire: RiskAssessmentDetails;
+  };
+  model_metadata?: any;
+}
+
+
 export interface NewsItem {
   id: number;
   region: string;

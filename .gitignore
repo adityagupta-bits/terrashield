@@ -25,6 +25,9 @@ htmlcov/
 venv/
 env/
 ENV/
+.venv/
+**/.venv/
+*.lock
 backend/venv/
 
 # Node / Frontend

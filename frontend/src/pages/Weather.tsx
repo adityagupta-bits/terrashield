@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCurrentWeather, useWeatherForecast } from '../../hooks/useData';
+import { useCurrentWeather, useWeatherForecast, useMultiHazardRisk } from '../../hooks/useData';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -14,6 +14,7 @@ import {
 export const Weather: React.FC = () => {
   const { data: current, isLoading: isCurrentLoading } = useCurrentWeather();
   const { data: forecastData, isLoading: isForecastLoading } = useWeatherForecast();
+  const { data: hazardRisk, isLoading: isHazardLoading } = useMultiHazardRisk(7);
 
   const forecastPoints = forecastData?.forecast || [];
 
@@ -167,6 +168,157 @@ export const Weather: React.FC = () => {
             </ResponsiveContainer>
           )}
         </div>
+      </div>
+
+      {/* Multi-Hazard Risk Assessment (ARIMA Forecaster) */}
+      <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+          <div>
+            <h2 className="text-xs font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+              <span>🛡️</span>
+              <span>7-Day Multi-Hazard Risk Forecaster (ARIMA Engine)</span>
+            </h2>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              Univariate ARIMA time-series models across temperature, precipitation, humidity, pressure, and wind speed.
+            </p>
+          </div>
+          {hazardRisk && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">Catchment Threat:</span>
+              <span className={`text-xs font-bold px-2.5 py-1 rounded border font-mono ${
+                hazardRisk.overall_severity === 'CRITICAL'
+                  ? 'bg-rose-950/80 text-rose-300 border-rose-700/60'
+                  : hazardRisk.overall_severity === 'ELEVATED'
+                  ? 'bg-amber-950/80 text-amber-300 border-amber-700/60'
+                  : 'bg-emerald-950/80 text-emerald-300 border-emerald-700/60'
+              }`}>
+                {hazardRisk.overall_severity} (Score: {hazardRisk.max_risk_score.toFixed(2)})
+              </span>
+            </div>
+          )}
+        </div>
+
+        {isHazardLoading ? (
+          <div className="text-center py-6 text-xs text-slate-500">
+            Running multi-variable ARIMA fits & calculating hazard thresholds...
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* Flood Risk Card */}
+            <div className={`p-3.5 rounded-xl border flex flex-col justify-between ${
+              hazardRisk?.risks?.flood?.triggered
+                ? 'bg-blue-950/40 border-blue-600/50 text-blue-200'
+                : 'bg-slate-900/60 border-slate-800 text-slate-300'
+            }`}>
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold flex items-center gap-1.5 text-blue-400">
+                    <span>🌊</span> Flood Risk
+                  </span>
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold uppercase ${
+                    hazardRisk?.risks?.flood?.triggered
+                      ? 'bg-blue-900/70 text-blue-300 border border-blue-500/40'
+                      : 'bg-slate-800 text-slate-400'
+                  }`}>
+                    {hazardRisk?.risks?.flood?.triggered ? 'ALERT' : 'NORMAL'}
+                  </span>
+                </div>
+                <div className="mt-2 text-2xl font-bold font-mono text-white">
+                  {(hazardRisk?.risks?.flood?.score ?? 0.12).toFixed(2)}
+                  <span className="text-xs font-normal text-slate-400 ml-1">/ 1.0</span>
+                </div>
+                <div className="text-[11px] text-slate-400 mt-2 space-y-1">
+                  {hazardRisk?.risks?.flood?.reasons?.length ? (
+                    hazardRisk.risks.flood.reasons.map((r, idx) => (
+                      <p key={idx} className="leading-tight text-slate-300">• {r}</p>
+                    ))
+                  ) : (
+                    <p className="text-slate-500 italic">Projected rainfall remains within safe absorption capacity.</p>
+                  )}
+                </div>
+              </div>
+              <div className="mt-3 pt-2 border-t border-slate-800/80 text-[10px] text-slate-400 font-mono">
+                Threshold: &ge; 100mm accum. / &ge; 50mm single day
+              </div>
+            </div>
+
+            {/* Drought Risk Card */}
+            <div className={`p-3.5 rounded-xl border flex flex-col justify-between ${
+              hazardRisk?.risks?.drought?.triggered
+                ? 'bg-amber-950/40 border-amber-600/50 text-amber-200'
+                : 'bg-slate-900/60 border-slate-800 text-slate-300'
+            }`}>
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold flex items-center gap-1.5 text-amber-400">
+                    <span>☀️</span> Drought Risk
+                  </span>
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold uppercase ${
+                    hazardRisk?.risks?.drought?.triggered
+                      ? 'bg-amber-900/70 text-amber-300 border border-amber-500/40'
+                      : 'bg-slate-800 text-slate-400'
+                  }`}>
+                    {hazardRisk?.risks?.drought?.triggered ? 'WATCH' : 'NORMAL'}
+                  </span>
+                </div>
+                <div className="mt-2 text-2xl font-bold font-mono text-white">
+                  {(hazardRisk?.risks?.drought?.score ?? 0.0).toFixed(2)}
+                  <span className="text-xs font-normal text-slate-400 ml-1">/ 1.0</span>
+                </div>
+                <div className="text-[11px] text-slate-400 mt-2 space-y-1">
+                  {hazardRisk?.risks?.drought?.reasons?.length ? (
+                    hazardRisk.risks.drought.reasons.map((r, idx) => (
+                      <p key={idx} className="leading-tight text-slate-300">• {r}</p>
+                    ))
+                  ) : (
+                    <p className="text-slate-500 italic">Adequate soil moisture and precipitation equilibrium.</p>
+                  )}
+                </div>
+              </div>
+              <div className="mt-3 pt-2 border-t border-slate-800/80 text-[10px] text-slate-400 font-mono">
+                Threshold: &le; 2mm rain & &ge; 30°C avg max & &le; 35% hum.
+              </div>
+            </div>
+
+            {/* Wildfire Risk Card */}
+            <div className={`p-3.5 rounded-xl border flex flex-col justify-between ${
+              hazardRisk?.risks?.fire?.triggered
+                ? 'bg-rose-950/40 border-rose-600/50 text-rose-200'
+                : 'bg-slate-900/60 border-slate-800 text-slate-300'
+            }`}>
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold flex items-center gap-1.5 text-rose-400">
+                    <span>🔥</span> Wildfire Risk
+                  </span>
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold uppercase ${
+                    hazardRisk?.risks?.fire?.triggered
+                      ? 'bg-rose-900/70 text-rose-300 border border-rose-500/40'
+                      : 'bg-slate-800 text-slate-400'
+                  }`}>
+                    {hazardRisk?.risks?.fire?.triggered ? 'CRITICAL' : 'LOW'}
+                  </span>
+                </div>
+                <div className="mt-2 text-2xl font-bold font-mono text-white">
+                  {(hazardRisk?.risks?.fire?.score ?? 0.05).toFixed(2)}
+                  <span className="text-xs font-normal text-slate-400 ml-1">/ 1.0</span>
+                </div>
+                <div className="text-[11px] text-slate-400 mt-2 space-y-1">
+                  {hazardRisk?.risks?.fire?.reasons?.length ? (
+                    hazardRisk.risks.fire.reasons.map((r, idx) => (
+                      <p key={idx} className="leading-tight text-slate-300">• {r}</p>
+                    ))
+                  ) : (
+                    <p className="text-slate-500 italic">Wind velocity and atmospheric moisture suppress fire ignition.</p>
+                  )}
+                </div>
+              </div>
+              <div className="mt-3 pt-2 border-t border-slate-800/80 text-[10px] text-slate-400 font-mono">
+                Threshold: &ge; 32°C & &le; 30% hum. & &ge; 4m/s wind
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Advisory Interpretation Box */}

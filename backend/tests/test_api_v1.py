@@ -221,3 +221,17 @@ def test_demo_controls():
     assert restore_resp.status_code == 200
     assert restore_resp.json()["status"] == "restored"
     assert restore_resp.json()["flushed_alerts"] >= 1
+
+def test_weather_multi_hazard_risk():
+    resp = client.get("/api/v1/weather/multi-hazard-risk?horizon_days=5")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "region" in data
+    assert data["horizon_days"] == 5
+    assert "risks" in data
+    assert "flood" in data["risks"]
+    assert "drought" in data["risks"]
+    assert "fire" in data["risks"]
+    assert len(data["daily_projections"]) == 5
+    assert len(data["dates"]) == 5
+

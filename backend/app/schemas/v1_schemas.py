@@ -158,6 +158,35 @@ class WeatherForecastResponse(BaseModel):
     points: List[WeatherForecastPoint]
     note: str = "Forecast based on past weather data"
 
+# Multi-Hazard Risk Forecaster Schemas
+class RiskAssessmentItem(BaseModel):
+    risk_type: str
+    triggered: bool
+    score: float
+    reasons: List[str]
+
+class DailyWeatherProjection(BaseModel):
+    date: str
+    temp_max: float
+    temp_min: float
+    humidity: float
+    precipitation: float
+    pressure: float
+    wind_speed: float
+
+class MultiHazardRiskResponse(BaseModel):
+    region: str
+    coordinates: Dict[str, float]
+    horizon_days: int
+    overall_severity: str
+    max_risk_score: float
+    triggered_hazards: List[str]
+    dates: List[str]
+    daily_projections: List[DailyWeatherProjection]
+    risks: Dict[str, RiskAssessmentItem]
+    model_metadata: Optional[Dict[str, Any]] = None
+
+
 # News Schemas
 class NewsResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

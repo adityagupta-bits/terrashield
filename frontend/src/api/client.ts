@@ -5,6 +5,7 @@ import {
   ContactItem,
   WeatherCurrent,
   WeatherForecastData,
+  MultiHazardRiskData,
   NewsItem,
   SystemStats,
   MeshTopologyData,
@@ -133,6 +134,10 @@ class ApiClient {
 
   async getWeatherForecast(): Promise<WeatherForecastData> {
     return this.request<WeatherForecastData>('/api/v1/weather/forecast');
+  }
+
+  async getMultiHazardRisk(horizonDays = 7, lat = 30.0869, lng = 78.2676): Promise<MultiHazardRiskData> {
+    return this.request<MultiHazardRiskData>(`/api/v1/weather/multi-hazard-risk?horizon_days=${horizonDays}&lat=${lat}&lng=${lng}`);
   }
 
   // News
