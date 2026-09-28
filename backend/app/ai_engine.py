@@ -318,22 +318,32 @@ class DisasterAIEngine:
     def assess_weather_multi_hazard_risk(
         history_df: Optional[Any] = None,
         horizon_days: int = 7,
-        lat: float = 30.0869,
-        lon: float = 78.2676,
+        lat: float = 26.1850,
+        lon: float = 91.7500,
         csv_path: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Multi-Variable ARIMA Weather Forecasting & Multi-Hazard Risk Assessment (Flood, Drought, Wildfire).
         Integrated from the Weather Risk Forecaster module.
         """
-        from app.risk_forecaster import (
-            forecast_all_variables,
-            forecasts_to_dataframe,
-            assess_all,
-            load_history_csv,
-            generate_synthetic_history,
-            clean_and_fill
-        )
+        try:
+            from model1 import (
+                forecast_all_variables,
+                forecasts_to_dataframe,
+                assess_all,
+                load_history_csv,
+                generate_synthetic_history,
+                clean_and_fill
+            )
+        except ImportError:
+            from app.risk_forecaster import (
+                forecast_all_variables,
+                forecasts_to_dataframe,
+                assess_all,
+                load_history_csv,
+                generate_synthetic_history,
+                clean_and_fill
+            )
 
         # 1. Load or synthesize historical meteorological data
         if history_df is None or (hasattr(history_df, "empty") and history_df.empty):
@@ -378,7 +388,7 @@ class DisasterAIEngine:
             overall_severity = "ELEVATED"
 
         return {
-            "region": "Rishikesh-Garhwal Catchment",
+            "region": "Brahmaputra & Kopili Basin, Assam (16 June Incident)",
             "coordinates": {"latitude": lat, "longitude": lon},
             "horizon_days": horizon_days,
             "overall_severity": overall_severity,

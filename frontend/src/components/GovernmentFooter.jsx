@@ -22,7 +22,7 @@ export default function GovernmentFooter() {
             </a>
             <a href="tel:1077" className="emergency-badge">
               <span className="badge-num">1077</span>
-              <span className="badge-label">SEOC / SDRF Uttarakhand</span>
+              <span className="badge-label">ASDMA SEOC / SDRF Assam</span>
             </a>
             <a href="tel:1078" className="emergency-badge">
               <span className="badge-num">1078</span>
@@ -49,8 +49,8 @@ export default function GovernmentFooter() {
             </div>
             <p className="footer-desc">
               TERRA SHIELD is an integrated multi-hazard early warning and environmental monitoring network designed for 
-              complex Himalayan terrains, combining real-time edge telemetry, resilient decentralized LoRa mesh networking, 
-              and vernacular ground truth verification.
+              complex riverine terrains of the Brahmaputra & Kopili basins (Assam 16 June Incident), combining real-time edge telemetry, 
+              resilient decentralized LoRa mesh networking, and vernacular ground truth verification.
             </p>
             <div className="footer-meta-pill">
               <span className="status-dot"></span>
@@ -66,21 +66,21 @@ export default function GovernmentFooter() {
                 <span className="bullet">›</span>
                 <div>
                   <strong>CWC Central Water Commission</strong>
-                  <div className="link-sub">Real-time Ganga-Chandrabhaga river discharge & gauge sensors</div>
+                  <div className="link-sub">Real-time Brahmaputra & Kopili river gauge & flood breach telemetry</div>
                 </div>
               </li>
               <li>
                 <span className="bullet">›</span>
                 <div>
                   <strong>IMD India Meteorological Dept</strong>
-                  <div className="link-sub">Doppler radar precipitation & extreme cloudburst forecasting</div>
+                  <div className="link-sub">Doppler radar precipitation & 2-year calibrated monsoonal forecasting</div>
                 </div>
               </li>
               <li>
                 <span className="bullet">›</span>
                 <div>
-                  <strong>FSI Forest Survey of India</strong>
-                  <div className="link-sub">Thermal anomaly hotspots & McArthur fire danger index (FFDI)</div>
+                  <strong>ASDMA Assam State Disaster Authority</strong>
+                  <div className="link-sub">State Emergency Operations Center (1070) & evacuation coordination</div>
                 </div>
               </li>
               <li>
@@ -99,7 +99,7 @@ export default function GovernmentFooter() {
             <div className="basin-specs">
               <div className="spec-item">
                 <span className="spec-label">Target Basin:</span>
-                <span className="spec-value">Rishikesh - Garhwal - Alaknanda River Basin</span>
+                <span className="spec-value">Brahmaputra - Kopili - Barak River Basin, Assam</span>
               </div>
               <div className="spec-item">
                 <span className="spec-label">Node Grid:</span>
@@ -115,7 +115,7 @@ export default function GovernmentFooter() {
               </div>
               <div className="spec-item">
                 <span className="spec-label">Human Verification:</span>
-                <span className="spec-value">Automated WhatsApp AI Bot for Village Sarpanches</span>
+                <span className="spec-value">Automated WhatsApp AI Bot for Village Gaonburahs & Sarpanches</span>
               </div>
             </div>
           </div>
@@ -127,22 +127,22 @@ export default function GovernmentFooter() {
               <li>
                 <span className="bullet">›</span>
                 <div>
-                  <strong>Flash Flood & Cloudburst Action:</strong>
-                  <div className="link-sub">Evacuate riverfront ghats immediately; proceed to higher ground.</div>
+                  <strong>Flash Flood & Embankment Breach:</strong>
+                  <div className="link-sub">Evacuate riverfront embankments immediately; proceed to higher ground.</div>
                 </div>
               </li>
               <li>
                 <span className="bullet">›</span>
                 <div>
-                  <strong>Forest Fire Ridge Protocol:</strong>
-                  <div className="link-sub">Clear perimeter dry combustible brush; avoid leeward slopes.</div>
+                  <strong>Slope Failure & Landslide Protocol:</strong>
+                  <div className="link-sub">Clear unstable foothill mud banks; avoid saturated leeward slopes.</div>
                 </div>
               </li>
               <li>
                 <span className="bullet">›</span>
                 <div>
                   <strong>Safe Evacuation Camps:</strong>
-                  <div className="link-sub">GIC Rishikesh, AIIMS Relief Wing, Panchayat High Ground Camps.</div>
+                  <div className="link-sub">Kampur HS Camp, Cotton Collegiate HS, Raha College Relief Hub.</div>
                 </div>
               </li>
               <li>

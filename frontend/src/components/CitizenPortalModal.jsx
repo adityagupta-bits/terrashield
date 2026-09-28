@@ -4,7 +4,7 @@ import { checkCitizenLocation } from '../services/api';
 
 export default function CitizenPortalModal({ isOpen, onClose }) {
   const [lang, setLang] = useState('hi'); // 'en', 'hi'
-  const [coords, setCoords] = useState({ lat: 30.0869, lon: 78.2676 });
+  const [coords, setCoords] = useState({ lat: 26.1850, lon: 91.7500 });
   const [riskData, setRiskData] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -32,7 +32,7 @@ export default function CitizenPortalModal({ isOpen, onClose }) {
   const translations = {
     en: {
       title: 'Citizen Disaster Safety Portal',
-      subtitle: 'Hyper-Local Geofenced Early Warning System',
+      subtitle: 'Hyper-Local Geofenced Early Warning System (Assam 16 June Incident)',
       safeStatus: 'YOUR ZONE IS SAFE',
       dangerStatus: 'EMERGENCY EVACUATION WARNING',
       cautionStatus: 'ELEVATED HAZARD CAUTION',
@@ -40,13 +40,13 @@ export default function CitizenPortalModal({ isOpen, onClose }) {
       emergencyHelplines: 'Disaster Emergency Helplines',
       callNow: 'Call Free',
       changeLocation: 'Test Sector Location:',
-      safeZone: 'Rishikesh Town (Safe)',
-      floodZone: 'Shivpuri Riverfront (Flood Zone)',
-      fireZone: 'Chilla Forest Fringe (Fire Zone)'
+      safeZone: 'Dispur Central (Safe)',
+      floodZone: 'Kampur Kopili Riverfront (Flood Deluge)',
+      fireZone: 'Karbi Anglong Slope (Slope Warning)'
     },
     hi: {
       title: 'नागरिक आपदा सुरक्षा पोर्टल',
-      subtitle: 'अति-स्थानीय जीपीएस पूर्व चेतावनी प्रणाली',
+      subtitle: 'अति-स्थानीय जीपीएस पूर्व चेतावनी प्रणाली (असम 16 जून घटना)',
       safeStatus: 'आपका क्षेत्र सुरक्षित है',
       dangerStatus: 'आपातकालीन निकासी चेतावनी',
       cautionStatus: 'सतर्कता चेतावनी: निगरानी जारी',
@@ -54,9 +54,9 @@ export default function CitizenPortalModal({ isOpen, onClose }) {
       emergencyHelplines: 'आपदा आपातकालीन हेल्पलाइन',
       callNow: 'कॉल करें',
       changeLocation: 'परीक्षण हेतु क्षेत्र चुनें:',
-      safeZone: 'ऋषिकेश मुख्य नगर (सुरक्षित)',
-      floodZone: 'शिवपुरी नदी तट (बाढ़ प्रभावित)',
-      fireZone: 'चीला वन क्षेत्र (अग्नि प्रभावित)'
+      safeZone: 'दिसपुर मुख्य नगर (सुरक्षित)',
+      floodZone: 'कामपुर कोपिली तटबंध (बाढ़ प्रभावित)',
+      fireZone: 'कार्बी आंगलोंग ढलान (ढलान चेतावनी)'
     }
   };
 
@@ -121,14 +121,14 @@ export default function CitizenPortalModal({ isOpen, onClose }) {
               <button
                 className="btn btn-outline"
                 style={{ flex: 1, padding: '5px', fontSize: '0.68rem', justifyContent: 'center' }}
-                onClick={() => setCoords({ lat: 30.0869, lon: 78.2676 })}
+                onClick={() => setCoords({ lat: 26.1850, lon: 91.7500 })}
               >
                 {t.safeZone}
               </button>
               <button
                 className="btn btn-outline"
                 style={{ flex: 1, padding: '5px', fontSize: '0.68rem', borderColor: '#fca5a5', color: '#dc2626', justifyContent: 'center' }}
-                onClick={() => setCoords({ lat: 30.1319, lon: 78.2896 })}
+                onClick={() => setCoords({ lat: 26.0520, lon: 92.7750 })}
               >
                 {t.floodZone}
               </button>

@@ -14,7 +14,9 @@ from app.db.session import SessionLocal
 from app.models import (
     Node, Reading, Alert, HazardZone, Contact, Subscriber,
     WhatsAppMessage, BroadcastLog, WeatherObservation,
-    WeatherForecast, NewsFlash, User, MeshLink
+    WeatherForecast, NewsFlash, User, MeshLink,
+    IncidentAlert, WhatsAppVerification, SafeShelter,
+    SensorNode, TelemetryRecord
 )
 
 def hash_password(password: str) -> str:
@@ -26,38 +28,59 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def hash_key(key: str) -> str:
     return hashlib.sha256(key.encode("utf-8")).hexdigest()
 
-def seed_database():
+def seed_database(force: bool = False):
     db = SessionLocal()
     try:
         print("=================================================================")
-        print("  TERRA SHIELD (SIH26178) - Database Seeding Engine")
+        print("  TERRA SHIELD (SIH26178) - Assam 16 June Incident Seeding Engine")
         print("=================================================================")
 
-        # Check if already seeded
-        if db.query(Node).count() > 0:
-            print("Database already contains nodes. Skipping full reseeding.")
+        if force:
+            print("Force flag detected. Clearing existing operational tables...")
+            for model in [
+                Reading, MeshLink, Alert, WhatsAppVerification, IncidentAlert,
+                SafeShelter, Contact, HazardZone, NewsFlash, Subscriber,
+                WhatsAppMessage, BroadcastLog, Node, User, SensorNode, TelemetryRecord
+            ]:
+                try:
+                    db.query(model).delete()
+                except Exception as ex:
+                    print(f"  Note cleaning {model.__name__}: {ex}")
+            db.commit()
+            print("Existing tables successfully cleared.")
+        elif db.query(Node).count() > 0:
+            print("Database already contains nodes. Use --force to reseed.")
             return
 
-        base_lat = 30.0869
-        base_lng = 78.2676
+        # Assam 16 June Incident Focal Point (Brahmaputra - Kopili Basin)
+        base_lat = 26.1850
+        base_lng = 91.7500
 
         # -------------------------------------------------------------
-        # 1. Physical Sensor Nodes (PHY-01 to PHY-05)
+        # 1. Physical Sensor Nodes (PHY-01 to PHY-05) - Hardware Sentinels
         # -------------------------------------------------------------
         physical_keys = {}
         physical_nodes_data = [
-            {"code": "PHY-01", "name": "Ganga Barrage Acoustic Sentry (Hardware)", "hazard_type": "flood", "lat": base_lat + 0.008, "lng": base_lng - 0.006, "level": 1, "parent": None},
-            {"code": "PHY-02", "name": "Chandrabhaga River Bridge (Hardware)", "hazard_type": "flood", "lat": base_lat + 0.019, "lng": base_lng - 0.012, "level": 2, "parent": "PHY-01"},
-            {"code": "PHY-03", "name": "Shivpuri Rafting Ghat Gauge (Hardware)", "hazard_type": "flood", "lat": base_lat + 0.041, "lng": base_lng + 0.018, "level": 3, "parent": "PHY-02"},
-            {"code": "PHY-04", "name": "Chilla Forest Thermal Sentinel (Hardware)", "hazard_type": "fire", "lat": base_lat - 0.031, "lng": base_lng - 0.024, "level": 1, "parent": None},
-            {"code": "PHY-05", "name": "Triveni Ghat Smart AQI Post (Hardware)", "hazard_type": "air", "lat": base_lat + 0.003, "lng": base_lng - 0.004, "level": 1, "parent": None},
+            {"code": "PHY-01", "name": "Saraighat Brahmaputra River Sentry (Hardware)", "hazard_type": "flood", "lat": 26.1850, "lng": 91.7000, "level": 1, "parent": None},
+            {"code": "PHY-02", "name": "Kopili River Bridge Inundation Gauge (Hardware)", "hazard_type": "flood", "lat": 26.0500, "lng": 92.7800, "level": 2, "parent": "PHY-01"},
+            {"code": "PHY-03", "name": "Kampur Embankment Critical Sentry (Hardware)", "hazard_type": "flood", "lat": 26.0800, "lng": 92.7400, "level": 3, "parent": "PHY-02"},
+            {"code": "PHY-04", "name": "Deepor Beel Catchment Water Watch (Hardware)", "hazard_type": "flood", "lat": 26.1200, "lng": 91.6600, "level": 1, "parent": None},
+            {"code": "PHY-05", "name": "Pandu Port Hydrological Telemetry Post (Hardware)", "hazard_type": "flood", "lat": 26.1820, "lng": 91.7150, "level": 1, "parent": None},
         ]
 
-        print("\n--- GENERATING PHYSICAL HARDWARE API KEYS (STORE SECURELY) ---")
+        print("\n--- GENERATING PHYSICAL HARDWARE API KEYS ---")
         created_nodes = {}
 
+        FIXED_PHYSICAL_KEYS = {
+            "PHY-01": "ts_live_phy-01_64f88c22889172f1b5b5fba7",
+            "PHY-02": "ts_live_phy-02_2c740691a988030224cac7bd",
+            "PHY-03": "ts_live_phy-03_60a6f1622ed3586ee0e8d612",
+            "PHY-04": "ts_live_phy-04_d446affeb8efdefb2482c5cc",
+            "PHY-05": "ts_live_phy-05_8c3727d15f4cf097a7ee1067",
+        }
+
         for pdata in physical_nodes_data:
-            plain_key = f"ts_live_{pdata['code'].lower()}_{secrets.token_hex(12)}"
+            plain_key = FIXED_PHYSICAL_KEYS.get(pdata["code"], f"ts_live_{pdata['code'].lower()}_{secrets.token_hex(12)}")
             key_hash = hash_key(plain_key)
             physical_keys[pdata["code"]] = plain_key
 
@@ -68,8 +91,8 @@ def seed_database():
                 latitude=pdata["lat"],
                 longitude=pdata["lng"],
                 status="normal",
-                battery_pct=96.5,
-                signal_strength=-62.0,
+                battery_pct=97.5,
+                signal_strength=-60.0,
                 mesh_level=pdata["level"],
                 is_gateway=(pdata["level"] == 0),
                 is_simulated=False,
@@ -77,6 +100,21 @@ def seed_database():
                 api_key_hash=key_hash
             )
             db.add(node)
+            snode = SensorNode(
+                id=pdata["code"],
+                name=pdata["name"],
+                hazard_type=pdata["hazard_type"],
+                latitude=pdata["lat"],
+                longitude=pdata["lng"],
+                status="ONLINE",
+                parent_node_id=pdata["parent"],
+                hop_count=pdata["level"],
+                battery_pct=97.5,
+                signal_rssi=-60.0,
+                is_gateway=(pdata["level"] == 0),
+                last_seen=datetime.utcnow()
+            )
+            db.add(snode)
             db.flush()
             created_nodes[pdata["code"]] = node
             print(f"  Node: {pdata['code']:<8} | Key: {plain_key}")
@@ -85,24 +123,23 @@ def seed_database():
         # 2. Simulated Nodes (15 Nodes: GW-01 + NODE-01..NODE-14)
         # -------------------------------------------------------------
         simulated_nodes_data = [
-            {"code": "GW-01", "name": "Main Control Station (GSM Sink)", "hazard_type": "multi", "lat": base_lat, "lng": base_lng, "is_gw": True, "level": 0, "parent": None},
-            {"code": "NODE-01", "name": "Ganga Barrage River Gauge", "hazard_type": "flood", "lat": base_lat + 0.012, "lng": base_lng - 0.008, "is_gw": False, "level": 1, "parent": "GW-01"},
-            {"code": "NODE-02", "name": "Chandrabhaga Confluence Sensor", "hazard_type": "flood", "lat": base_lat + 0.024, "lng": base_lng - 0.015, "is_gw": False, "level": 2, "parent": "NODE-01"},
-            {"code": "NODE-03", "name": "Shivpuri Upstream Gauge", "hazard_type": "flood", "lat": base_lat + 0.045, "lng": base_lng + 0.022, "is_gw": False, "level": 3, "parent": "NODE-02"},
-            {"code": "NODE-04", "name": "Byasi Canyon Flood Sentinel", "hazard_type": "flood", "lat": base_lat + 0.065, "lng": base_lng + 0.038, "is_gw": False, "level": 4, "parent": "NODE-03"},
-            {"code": "NODE-05", "name": "Devprayag Confluence Watch", "hazard_type": "flood", "lat": base_lat + 0.095, "lng": base_lng + 0.055, "is_gw": False, "level": 5, "parent": "NODE-04"},
-            {"code": "NODE-06", "name": "Rajaji National Park Sector 1", "hazard_type": "fire", "lat": base_lat - 0.025, "lng": base_lng - 0.020, "is_gw": False, "level": 1, "parent": "GW-01"},
-            {"code": "NODE-07", "name": "Chilla Forest Thermal Sentry", "hazard_type": "fire", "lat": base_lat - 0.042, "lng": base_lng - 0.035, "is_gw": False, "level": 2, "parent": "NODE-06"},
-            {"code": "NODE-08", "name": "Kaudiyala Ridge (LoRa Satellite Backup)", "hazard_type": "fire", "lat": base_lat + 0.050, "lng": base_lng + 0.040, "is_gw": False, "level": 2, "parent": "NODE-03"},
-            {"code": "NODE-09", "name": "Neelkanth Valley Fire Lookout", "hazard_type": "fire", "lat": base_lat - 0.018, "lng": base_lng + 0.030, "is_gw": False, "level": 1, "parent": "GW-01"},
-            {"code": "NODE-10", "name": "Manikoot Ridge Acoustic Node", "hazard_type": "fire", "lat": base_lat - 0.035, "lng": base_lng + 0.045, "is_gw": False, "level": 2, "parent": "NODE-09"},
-            {"code": "NODE-11", "name": "Triveni Ghat Public AQI Node", "hazard_type": "air", "lat": base_lat + 0.005, "lng": base_lng - 0.005, "is_gw": False, "level": 1, "parent": "GW-01"},
-            {"code": "NODE-12", "name": "AIIMS Rishikesh Health Zone Node", "hazard_type": "air", "lat": base_lat - 0.020, "lng": base_lng + 0.010, "is_gw": False, "level": 1, "parent": "GW-01"},
-            {"code": "NODE-13", "name": "IDPL Industrial Area AQI Sentry", "hazard_type": "air", "lat": base_lat - 0.015, "lng": base_lng - 0.015, "is_gw": False, "level": 2, "parent": "NODE-12"},
-            {"code": "NODE-14", "name": "Tapovan Tourist Belt Multi-Hazard", "hazard_type": "multi", "lat": base_lat + 0.030, "lng": base_lng + 0.015, "is_gw": False, "level": 2, "parent": "NODE-01"},
+            {"code": "GW-01", "name": "ASDMA State Disaster Ops Center (GSM Sink)", "hazard_type": "multi", "lat": 26.1450, "lng": 91.7360, "is_gw": True, "level": 0, "parent": None},
+            {"code": "NODE-01", "name": "Saraighat Brahmaputra River Gauge", "hazard_type": "flood", "lat": 26.1860, "lng": 91.6980, "is_gw": False, "level": 1, "parent": "GW-01"},
+            {"code": "NODE-02", "name": "Pandu Hydrological Monitoring Post", "hazard_type": "flood", "lat": 26.1800, "lng": 91.7120, "is_gw": False, "level": 2, "parent": "NODE-01"},
+            {"code": "NODE-03", "name": "Kampur Town Kopili River Sensor", "hazard_type": "flood", "lat": 26.0520, "lng": 92.7750, "is_gw": False, "level": 3, "parent": "NODE-02"},
+            {"code": "NODE-04", "name": "Raha Kopili Confluence Sentinel", "hazard_type": "flood", "lat": 26.2200, "lng": 92.5200, "is_gw": False, "level": 4, "parent": "NODE-03"},
+            {"code": "NODE-05", "name": "Dharamtul Riverbed Telemetry Station", "hazard_type": "flood", "lat": 26.1500, "lng": 92.3500, "is_gw": False, "level": 5, "parent": "NODE-04"},
+            {"code": "NODE-06", "name": "Palashbari Brahmaputra Embankment", "hazard_type": "flood", "lat": 26.1300, "lng": 91.5000, "is_gw": False, "level": 1, "parent": "GW-01"},
+            {"code": "NODE-07", "name": "Sualkuchi North Bank Flood Watch", "hazard_type": "flood", "lat": 26.1700, "lng": 91.5700, "is_gw": False, "level": 2, "parent": "NODE-06"},
+            {"code": "NODE-08", "name": "North Guwahati Hill Slope Sensor", "hazard_type": "landslide", "lat": 26.2100, "lng": 91.7200, "is_gw": False, "level": 2, "parent": "NODE-01"},
+            {"code": "NODE-09", "name": "Sonapur Digaru River Sentry", "hazard_type": "flood", "lat": 26.1200, "lng": 91.9800, "is_gw": False, "level": 1, "parent": "GW-01"},
+            {"code": "NODE-10", "name": "Morigaon Lowland Inundation Sensor", "hazard_type": "flood", "lat": 26.2500, "lng": 92.3400, "is_gw": False, "level": 2, "parent": "NODE-09"},
+            {"code": "NODE-11", "name": "Guwahati Central AQI & Weather Post", "hazard_type": "air", "lat": 26.1850, "lng": 91.7500, "is_gw": False, "level": 1, "parent": "GW-01"},
+            {"code": "NODE-12", "name": "GMCH Emergency Zone Sensor", "hazard_type": "air", "lat": 26.1550, "lng": 91.7700, "is_gw": False, "level": 1, "parent": "GW-01"},
+            {"code": "NODE-13", "name": "Noonmati Refinery AQI Sentry", "hazard_type": "air", "lat": 26.1950, "lng": 91.8000, "is_gw": False, "level": 2, "parent": "NODE-12"},
+            {"code": "NODE-14", "name": "Dispur Capital Complex Multi-Hazard", "hazard_type": "multi", "lat": 26.1400, "lng": 91.7900, "is_gw": False, "level": 2, "parent": "NODE-01"},
         ]
 
-        # Universal simulator master key
         sim_master_key = "ts_sim_master_key_2026"
         sim_key_hash = hash_key(sim_master_key)
 
@@ -114,8 +151,8 @@ def seed_database():
                 latitude=sdata["lat"],
                 longitude=sdata["lng"],
                 status="normal",
-                battery_pct=98.0,
-                signal_strength=-50.0 - (sdata["level"] * 8),
+                battery_pct=98.5,
+                signal_strength=-52.0 - (sdata["level"] * 7),
                 mesh_level=sdata["level"],
                 is_gateway=sdata["is_gw"],
                 is_simulated=True,
@@ -123,6 +160,21 @@ def seed_database():
                 api_key_hash=sim_key_hash
             )
             db.add(node)
+            snode = SensorNode(
+                id=sdata["code"],
+                name=sdata["name"],
+                hazard_type=sdata["hazard_type"],
+                latitude=sdata["lat"],
+                longitude=sdata["lng"],
+                status="GATEWAY" if sdata["is_gw"] else ("ONLINE" if sdata["level"] <= 1 else "MESH_RELAY"),
+                parent_node_id=sdata["parent"],
+                hop_count=sdata["level"],
+                battery_pct=98.5,
+                signal_rssi=-52.0 - (sdata["level"] * 7),
+                is_gateway=sdata["is_gw"],
+                last_seen=datetime.utcnow()
+            )
+            db.add(snode)
             db.flush()
             created_nodes[sdata["code"]] = node
 
@@ -139,37 +191,36 @@ def seed_database():
                 link = MeshLink(
                     from_node_id=created_nodes[sdata["code"]].id,
                     to_node_id=created_nodes[sdata["parent"]].id,
-                    rssi=-52.0 - (sdata["level"] * 9),
+                    rssi=-54.0 - (sdata["level"] * 8),
                     link_type="cellular" if sdata["is_gw"] else ("lora" if sdata["level"] >= 3 else "esp_now"),
                     active=True
                 )
                 db.add(link)
 
         # -------------------------------------------------------------
-        # 4. Contacts (20+ Contacts)
+        # 4. Assam Contacts & Safe Shelters (20+ Records)
         # -------------------------------------------------------------
         contacts_data = [
-            {"name": "National Emergency Response Helpline", "category": "helpline", "phone": "112", "district": "All Districts", "cap": None, "occ": None, "lat": base_lat, "lng": base_lng},
-            {"name": "NDRF 8th Battalion Control HQ", "category": "rescue", "phone": "+91 11 24363260", "district": "Dehradun", "cap": None, "occ": None, "lat": base_lat + 0.015, "lng": base_lng + 0.020},
-            {"name": "SDRF Uttarakhand Rapid Disaster Command", "category": "rescue", "phone": "+91 135 2710334", "district": "Tehri Garhwal", "cap": None, "occ": None, "lat": base_lat + 0.022, "lng": base_lng - 0.010},
-            {"name": "Fire Service Control Room", "category": "helpline", "phone": "101", "district": "Rishikesh", "cap": None, "occ": None, "lat": base_lat + 0.002, "lng": base_lng - 0.002},
-            {"name": "Ambulance Emergency Medical Response", "category": "helpline", "phone": "108", "district": "Uttarakhand State", "cap": None, "occ": None, "lat": base_lat - 0.001, "lng": base_lng + 0.001},
-            {"name": "District Emergency Operation Centre (DEOC)", "category": "authority", "phone": "1077", "district": "Dehradun", "cap": None, "occ": None, "lat": base_lat - 0.012, "lng": base_lng + 0.008},
-            {"name": "Tehri Garhwal Flood Control Room", "category": "authority", "phone": "+91 1376 232155", "district": "Tehri Garhwal", "cap": None, "occ": None, "lat": base_lat + 0.035, "lng": base_lng + 0.025},
-            {"name": "AIIMS Emergency Disaster Relief Wing", "category": "shelter", "phone": "+91 135 2462999", "district": "Rishikesh", "cap": 300, "occ": 42, "lat": base_lat - 0.019, "lng": base_lng + 0.012},
-            {"name": "Government Inter College Evacuation Shelter", "category": "shelter", "phone": "+91 135 2430111", "district": "Rishikesh", "cap": 600, "occ": 85, "lat": base_lat + 0.008, "lng": base_lng + 0.005},
-            {"name": "Panchayat Bhavan High-Ground Relief Camp", "category": "shelter", "phone": "+91 135 2439888", "district": "Shivpuri Sector", "cap": 450, "occ": 30, "lat": base_lat + 0.032, "lng": base_lng - 0.002},
-            {"name": "Shri Bharat Mandir Community Relief Hall", "category": "shelter", "phone": "+91 135 2430222", "district": "Rishikesh Central", "cap": 500, "occ": 15, "lat": base_lat + 0.010, "lng": base_lng - 0.010},
-            {"name": "Muni Ki Reti Disaster Relief Shelter", "category": "shelter", "phone": "+91 135 2430444", "district": "Tehri Garhwal", "cap": 400, "occ": 10, "lat": base_lat + 0.018, "lng": base_lng - 0.008},
-            {"name": "Tapovan Primary School Evacuation Center", "category": "shelter", "phone": "+91 135 2430555", "district": "Tehri Garhwal", "cap": 350, "occ": 5, "lat": base_lat + 0.028, "lng": base_lng + 0.014},
-            {"name": "Byasi High School Emergency Shelter", "category": "shelter", "phone": "+91 1378 245100", "district": "Tehri Garhwal", "cap": 250, "occ": 0, "lat": base_lat + 0.062, "lng": base_lng + 0.036},
-            {"name": "Devprayag Sangam Community Center", "category": "shelter", "phone": "+91 1378 261200", "district": "Tehri Garhwal", "cap": 300, "occ": 0, "lat": base_lat + 0.092, "lng": base_lng + 0.052},
-            {"name": "Indian Red Cross Society Uttarakhand Cell", "category": "ngo", "phone": "+91 135 2652155", "district": "Dehradun", "cap": None, "occ": None, "lat": base_lat - 0.015, "lng": base_lng + 0.018},
-            {"name": "Sewa International Humanitarian Relief", "category": "ngo", "phone": "+91 135 2439120", "district": "Garhwal Division", "cap": None, "occ": None, "lat": base_lat + 0.005, "lng": base_lng + 0.022},
-            {"name": "Goonj Disaster Relief & Clothing Bank", "category": "ngo", "phone": "+91 11 26972351", "district": "Rishikesh", "cap": None, "occ": None, "lat": base_lat - 0.008, "lng": base_lng - 0.015},
-            {"name": "Rajaji National Park Range Officer (Fire Unit)", "category": "authority", "phone": "+91 135 2430777", "district": "Chilla Range", "cap": None, "occ": None, "lat": base_lat - 0.035, "lng": base_lng - 0.030},
-            {"name": "Kaudiyala Emergency Relief Station", "category": "rescue", "phone": "+91 1378 245200", "district": "Tehri Garhwal", "cap": 150, "occ": 12, "lat": base_lat + 0.052, "lng": base_lng + 0.042},
-            {"name": "State Disaster Mitigation & Management Centre", "category": "authority", "phone": "+91 135 2710335", "district": "Dehradun", "cap": None, "occ": None, "lat": base_lat - 0.025, "lng": base_lng + 0.005}
+            {"name": "National Emergency Response Helpline", "category": "helpline", "phone": "112", "district": "All Assam", "cap": None, "occ": None, "lat": 26.1450, "lng": 91.7360},
+            {"name": "ASDMA State Emergency Operation Centre (SEOC)", "category": "authority", "phone": "1070", "district": "Kamrup Metro (Dispur)", "cap": None, "occ": None, "lat": 26.1400, "lng": 91.7900},
+            {"name": "DEOC Kamrup Metropolitan Control Room", "category": "authority", "phone": "1077", "district": "Guwahati", "cap": None, "occ": None, "lat": 26.1850, "lng": 91.7500},
+            {"name": "DEOC Nagaon Flood Control Desk", "category": "authority", "phone": "03672-233222", "district": "Nagaon", "cap": None, "occ": None, "lat": 26.3450, "lng": 92.6850},
+            {"name": "NDRF 1st Battalion Command HQ Patgaon", "category": "rescue", "phone": "+91 361 2840284", "district": "Kamrup Rural", "cap": None, "occ": None, "lat": 26.1100, "lng": 91.5900},
+            {"name": "SDRF Assam Fire & Emergency Headquarters", "category": "rescue", "phone": "0361-2540222", "district": "Guwahati Panbazar", "cap": None, "occ": None, "lat": 26.1890, "lng": 91.7450},
+            {"name": "Cotton Collegiate HS Evacuation Camp", "category": "shelter", "phone": "+91 361 2540111", "district": "Guwahati Central", "cap": 800, "occ": 210, "lat": 26.1870, "lng": 91.7480},
+            {"name": "Kampur Higher Secondary School Relief Camp", "category": "shelter", "phone": "+91 3672 245100", "district": "Nagaon (Kampur)", "cap": 650, "occ": 420, "lat": 26.0530, "lng": 92.7760},
+            {"name": "Raha College Flood Relief Center", "category": "shelter", "phone": "+91 3672 288300", "district": "Nagaon (Raha)", "cap": 500, "occ": 195, "lat": 26.2220, "lng": 92.5210},
+            {"name": "GMCH Emergency Disaster Relief Wing", "category": "shelter", "phone": "+91 361 2130190", "district": "Guwahati", "cap": 400, "occ": 65, "lat": 26.1550, "lng": 91.7700},
+            {"name": "Palashbari Relief Hall", "category": "shelter", "phone": "+91 361 2842100", "district": "Kamrup Rural", "cap": 450, "occ": 110, "lat": 26.1320, "lng": 91.5020},
+            {"name": "Sualkuchi Community Center Shelter", "category": "shelter", "phone": "+91 361 2831200", "district": "Kamrup Rural", "cap": 350, "occ": 40, "lat": 26.1710, "lng": 91.5720},
+            {"name": "Morigaon District Stadium Relief Camp", "category": "shelter", "phone": "+91 3678 240210", "district": "Morigaon", "cap": 700, "occ": 310, "lat": 26.2520, "lng": 92.3420},
+            {"name": "Central Water Commission (CWC) Guwahati River Monitoring", "category": "authority", "phone": "0361-2260170", "district": "Guwahati", "cap": None, "occ": None, "lat": 26.1820, "lng": 91.7580},
+            {"name": "Indian Red Cross Society Assam State Branch", "category": "ngo", "phone": "+91 361 2664538", "district": "Chandmari Guwahati", "cap": None, "occ": None, "lat": 26.1890, "lng": 91.7750},
+            {"name": "Oxfam India Flood Relief Hub Guwahati", "category": "ngo", "phone": "+91 361 2459981", "district": "Kamrup Metro", "cap": None, "occ": None, "lat": 26.1750, "lng": 91.7650},
+            {"name": "Brahmaputra Board River Engineering Command", "category": "authority", "phone": "0361-2300084", "district": "Basistha Guwahati", "cap": None, "occ": None, "lat": 26.1280, "lng": 91.7890},
+            {"name": "Assam State Inland Water Transport (Rescue Boats)", "category": "rescue", "phone": "0361-2540193", "district": "Pandu Port", "cap": None, "occ": None, "lat": 26.1830, "lng": 91.7140},
+            {"name": "Free 108 Emergency Ambulance Assam", "category": "helpline", "phone": "108", "district": "All Assam", "cap": None, "occ": None, "lat": 26.1500, "lng": 91.7500},
+            {"name": "Fire & Emergency Services Assam (Panbazar)", "category": "helpline", "phone": "101", "district": "Kamrup Metro", "cap": None, "occ": None, "lat": 26.1880, "lng": 91.7460}
         ]
 
         for c in contacts_data:
@@ -185,45 +236,60 @@ def seed_database():
             )
             db.add(contact)
 
+            # Also seed into SafeShelter table if category is shelter
+            if c["category"] == "shelter":
+                shelter = SafeShelter(
+                    name=c["name"],
+                    shelter_type="RELIEF_CAMP",
+                    latitude=c["lat"],
+                    longitude=c["lng"],
+                    capacity=c["cap"] or 500,
+                    current_occupancy=c["occ"] or 0,
+                    contact_number=c["phone"],
+                    is_open=True
+                )
+                db.add(shelter)
+
         # -------------------------------------------------------------
-        # 5. Hazard Zones (GeoJSON Polygons)
+        # 5. Assam Hazard Zones (GeoJSON Polygons)
         # -------------------------------------------------------------
-        flood_poly = {
+        kopili_flood_poly = {
             "type": "Polygon",
             "coordinates": [[
-                [base_lng - 0.020, base_lat + 0.005],
-                [base_lng - 0.015, base_lat + 0.035],
-                [base_lng + 0.030, base_lat + 0.055],
-                [base_lng + 0.045, base_lat + 0.040],
-                [base_lng + 0.010, base_lat + 0.010],
-                [base_lng - 0.020, base_lat + 0.005]
+                [92.65, 26.00],
+                [92.85, 26.02],
+                [92.82, 26.14],
+                [92.50, 26.25],
+                [92.45, 26.15],
+                [92.65, 26.00]
             ]]
         }
-        fire_poly = {
+        brahmaputra_poly = {
             "type": "Polygon",
             "coordinates": [[
-                [base_lng - 0.040, base_lat - 0.045],
-                [base_lng - 0.020, base_lat - 0.020],
-                [base_lng - 0.010, base_lat - 0.035],
-                [base_lng - 0.030, base_lat - 0.055],
-                [base_lng - 0.040, base_lat - 0.045]
+                [91.48, 26.12],
+                [91.75, 26.19],
+                [91.85, 26.22],
+                [91.80, 26.25],
+                [91.50, 26.18],
+                [91.48, 26.12]
             ]]
         }
-        smog_poly = {
+        deepor_beel_poly = {
             "type": "Polygon",
             "coordinates": [[
-                [base_lng - 0.025, base_lat - 0.025],
-                [base_lng + 0.015, base_lat - 0.025],
-                [base_lng + 0.015, base_lat + 0.015],
-                [base_lng - 0.025, base_lat + 0.015],
-                [base_lng - 0.025, base_lat - 0.025]
+                [91.63, 26.10],
+                [91.69, 26.10],
+                [91.69, 26.15],
+                [91.63, 26.15],
+                [91.63, 26.10]
             ]]
         }
 
         zones_data = [
-            {"name": "Ganga-Chandrabhaga High-Risk Inundation Zone", "hazard_type": "flood", "risk": "critical", "geom": flood_poly},
-            {"name": "Chilla Forest & Rajaji Thermal Hotspot Belt", "hazard_type": "fire", "risk": "high", "geom": fire_poly},
-            {"name": "IDPL-Triveni Urban Smog Dispersion Basin", "hazard_type": "air", "risk": "medium", "geom": smog_poly}
+            {"name": "Kopili River High-Risk Inundation Zone (Kampur-Raha Breach)", "hazard_type": "flood", "risk": "critical", "geom": kopili_flood_poly},
+            {"name": "Brahmaputra Low-Lying Riverine Flood Plain (Pandu-Saraighat)", "hazard_type": "flood", "risk": "high", "geom": brahmaputra_poly},
+            {"name": "Deepor Beel Urban Catchment Waterlogging Zone", "hazard_type": "flood", "risk": "medium", "geom": deepor_beel_poly}
         ]
 
         for z in zones_data:
@@ -236,13 +302,13 @@ def seed_database():
             db.add(zone)
 
         # -------------------------------------------------------------
-        # 6. News Bulletins
+        # 6. News Bulletins (Assam 16 June Incident)
         # -------------------------------------------------------------
         news_data = [
-            {"region": "Uttarakhand", "title": "NDMA Issues Cloudburst & Flash Flood Alert for Alaknanda-Bhagirathi Basin", "summary": "Heavy monsoonal precipitation projected across upper Garhwal catchment. All district disaster units placed on standby.", "source": "NDMA National Portal"},
-            {"region": "Kerala", "title": "Wayanad Landslide Recovery: SDRF & TERRA SHIELD Mesh Deployed for Offline Comms", "summary": "Decentralized sensor beacons installed across vulnerable tea estate slopes after cellular infrastructure washouts.", "source": "Press Information Bureau"},
-            {"region": "Assam", "title": "Brahmaputra Surpasses High Flood Level at Kaziranga Outpost", "summary": "Ultrasonic water level telemetry indicates 1.2m rise in 12 hours. Early warning bulletins sent to 14 Gram Panchayats.", "source": "Assam Disaster Management Authority"},
-            {"region": "Himachal Pradesh", "title": "Wildfire Warning Raised Across Pine Belts Following Heat Anomaly", "summary": "High FFDI indices observed in Solan and Mandi districts; community fire sentries alerted.", "source": "HP Forest Department"}
+            {"region": "Assam", "title": "16 June Flood Deluge: Kopili River Breaches Historic High Flood Level at Kampur", "summary": "Continuous torrential precipitation recorded at 184 mm. Water level in Kopili River reached 4.85m exceeding previous HFL of 4.75m. Over 15,000 residents moved to relief camps in Kampur and Raha.", "source": "Assam Disaster Management Authority (ASDMA)"},
+            {"region": "Assam", "title": "Brahmaputra River Inundation Alert Issued for Pandu & Palashbari", "summary": "Ultrasonic water level telemetry at Saraighat indicates 1.6m rapid surge. NDRF 1st Bn deployed 8 inflatable motorboats for evacuation along low-lying river islands.", "source": "Central Water Commission (CWC)"},
+            {"region": "Assam", "title": "TERRA SHIELD Decentralized Mesh Network Operational Across Flood Hit Panchayats", "summary": "Battery-backed ESP-NOW and LoRa mesh nodes deployed at Kampur and Raha providing zero-cellular early warnings to local Gaonburahs.", "source": "District Disaster Emergency Operations"},
+            {"region": "Assam", "title": "Guwahati Municipal Corporation Activates Sump Pumps Across Bharalu & Deepor Beel", "summary": "Urban water logging mitigation teams on 24x7 rotation as monsoonal depression hovers over Brahmaputra valley.", "source": "Guwahati Municipal Corporation"}
         ]
 
         for n in news_data:
@@ -255,19 +321,17 @@ def seed_database():
             db.add(news)
 
         # -------------------------------------------------------------
-        # 7. Subscribers (WhatsApp Verification & Citizen Alerting)
+        # 7. Subscribers & Gaonburahs (Assam Panchayats)
         # -------------------------------------------------------------
         subscribers_data = [
-            {"name": "Ram Singh (Gram Pradhan)", "phone": "+919876543210", "role": "sarpanch", "lang": "hi", "village": "Shivpuri", "lat": base_lat + 0.045, "lng": base_lng + 0.022, "r": 6.0},
-            {"name": "Suresh Rawat (Sarpanch)", "phone": "+919876543211", "role": "sarpanch", "lang": "hi", "village": "Byasi", "lat": base_lat + 0.065, "lng": base_lng + 0.038, "r": 5.0},
-            {"name": "Kavita Devi (Panchayat Head)", "phone": "+919876543212", "role": "sarpanch", "lang": "hi", "village": "Chilla", "lat": base_lat - 0.042, "lng": base_lng - 0.035, "r": 8.0},
-            {"name": "Anil Bhatt (Ward Councillor)", "phone": "+919876543213", "role": "councillor", "lang": "en", "village": "Triveni Ghat Ward 4", "lat": base_lat + 0.005, "lng": base_lng - 0.005, "r": 3.0},
-            {"name": "Pooja Negi (Citizen)", "phone": "+919876543214", "role": "citizen", "lang": "hi", "village": "Tapovan", "lat": base_lat + 0.030, "lng": base_lng + 0.015, "r": 5.0},
-            {"name": "Vikram Thapa (Citizen)", "phone": "+919876543215", "role": "citizen", "lang": "en", "village": "Muni Ki Reti", "lat": base_lat + 0.018, "lng": base_lng - 0.008, "r": 4.0},
-            {"name": "Manoj Joshi (Citizen)", "phone": "+919876543216", "role": "citizen", "lang": "hi", "village": "Chandrabhaga Basti", "lat": base_lat + 0.024, "lng": base_lng - 0.015, "r": 4.0},
-            {"name": "Deepak Pant (Citizen)", "phone": "+919876543217", "role": "citizen", "lang": "hi", "village": "IDPL Colony", "lat": base_lat - 0.015, "lng": base_lng - 0.015, "r": 5.0},
-            {"name": "Meena Gusain (Citizen)", "phone": "+919876543218", "role": "citizen", "lang": "hi", "village": "Kaudiyala", "lat": base_lat + 0.050, "lng": base_lng + 0.040, "r": 6.0},
-            {"name": "Rajesh Semwal (Citizen)", "phone": "+919876543219", "role": "citizen", "lang": "hi", "village": "Devprayag Confluence", "lat": base_lat + 0.095, "lng": base_lng + 0.055, "r": 6.0}
+            {"name": "Bhupen Saikia (Gaonburah)", "phone": "+919864012345", "role": "sarpanch", "lang": "hi", "village": "Kampur Town Panchayat", "lat": 26.0520, "lng": 92.7750, "r": 6.0},
+            {"name": "Hemanta Deka (Gaonburah)", "phone": "+919864012346", "role": "sarpanch", "lang": "hi", "village": "Raha Kopili Ward", "lat": 26.2200, "lng": 92.5200, "r": 5.0},
+            {"name": "Biren Das (Panchayat Head)", "phone": "+919864012347", "role": "sarpanch", "lang": "hi", "village": "Palashbari Riverbank", "lat": 26.1300, "lng": 91.5000, "r": 7.0},
+            {"name": "Pranab Barman (Ward Councillor)", "phone": "+919864012348", "role": "councillor", "lang": "en", "village": "Pandu Port Colony", "lat": 26.1800, "lng": 91.7120, "r": 4.0},
+            {"name": "Jonali Kalita (Citizen)", "phone": "+919864012349", "role": "citizen", "lang": "hi", "village": "Saraighat Ghat", "lat": 26.1860, "lng": 91.6980, "r": 4.0},
+            {"name": "Ramen Bora (Citizen)", "phone": "+919864012350", "role": "citizen", "lang": "en", "village": "Dharamtul", "lat": 26.1500, "lng": 92.3500, "r": 5.0},
+            {"name": "Mitali Hazarika (Citizen)", "phone": "+919864012351", "role": "citizen", "lang": "hi", "village": "Sualkuchi Silk Town", "lat": 26.1700, "lng": 91.5700, "r": 4.0},
+            {"name": "Debajit Sarma (Citizen)", "phone": "+919864012352", "role": "citizen", "lang": "hi", "village": "Sonapur Digaru", "lat": 26.1200, "lng": 91.9800, "r": 5.0},
         ]
 
         for s in subscribers_data:
@@ -284,7 +348,7 @@ def seed_database():
             db.add(sub)
 
         # -------------------------------------------------------------
-        # 8. Demo Users (Authorities & Viewers)
+        # 8. Demo Users
         # -------------------------------------------------------------
         admin_user = User(
             email="admin@terrashield.gov.in",
@@ -300,30 +364,101 @@ def seed_database():
         db.add(viewer_user)
 
         # -------------------------------------------------------------
-        # 9. Baseline Readings for all nodes
+        # 9. Active Incident Alert & WhatsApp Verification (16 June Assam Flood)
+        # -------------------------------------------------------------
+        incident = IncidentAlert(
+            hazard_type="FLOOD",
+            severity="EMERGENCY",
+            title="Kampur Kopili River Surge & Embankment Breach (16 June Assam Incident)",
+            description="Continuous deluge has pushed River Kopili gauge to 4.85m at Kampur, breaching the Highest Flood Level (HFL 4.75m). Inundation threatens 12 villages across Kampur and Raha revenue circles.",
+            location_name="Kampur, Kopili River Basin (Assam)",
+            latitude=26.0500,
+            longitude=92.7800,
+            radius_km=15.0,
+            timestamp=datetime.utcnow(),
+            is_active=True,
+            verified_by_human=True,
+            verification_source="WhatsApp Gaonburah Verified (Bhupen Saikia)",
+            evacuation_triggered=True,
+            ndrf_dispatched=True
+        )
+        db.add(incident)
+        db.flush()
+
+        verif = WhatsAppVerification(
+            incident_id=incident.id,
+            sarpanch_name="Bhupen Saikia (Gaonburah - Kampur)",
+            phone_number="+919864012345",
+            query_sent="⚠️ *TERRA SHIELD आपदा चेतावनी प्रणाली*\n\nनमस्ते श्री भूपेन सैकिया जी (गांवबुढ़ा - कामपुर),\nसेंसर द्वारा *कामपुर कोपिली तटबंध* में जलस्तर 4.85m (HFL से ऊपर) दर्ज किया गया है।\n\nक्या कामपुर में बाढ़ का पानी गांवों में घुस रहा है? कृपया पुष्टि करें।",
+            query_language="hi",
+            response_received="हाँ, पानी तटबंध पार कर गांव में घुस रहा है। तुरंत राहत नाव भेजें।",
+            verification_status="CONFIRMED",
+            nlp_confidence=0.96,
+            timestamp=datetime.utcnow()
+        )
+        db.add(verif)
+
+        # Additional System Alert
+        sys_alert = Alert(
+            node_id=created_nodes["PHY-03"].id,
+            hazard_type="flood",
+            severity="critical",
+            confidence=0.98,
+            message="Kampur Embankment Gauge Critical - Kopili River Deluge (16 June Incident)",
+            reason="Water level reading 4.85m exceeds extreme danger mark (4.75m HFL). Evacuation protocol active.",
+            decided_on_device=True,
+            decision_ms=35,
+            status="open",
+            ground_truth="confirmed",
+            latitude=26.0800,
+            longitude=92.7400,
+            node_timestamp=datetime.utcnow(),
+            received_at=datetime.utcnow()
+        )
+        db.add(sys_alert)
+
+        # -------------------------------------------------------------
+        # 10. Baseline Readings for all nodes
         # -------------------------------------------------------------
         for code, node in created_nodes.items():
+            # Higher water levels for flood nodes
+            is_flood_critical = code in ["PHY-01", "PHY-02", "PHY-03", "NODE-01", "NODE-03", "NODE-04"]
             reading = Reading(
                 node_id=node.id,
                 ts=datetime.utcnow(),
-                water_level_cm=165.0,
-                water_rate_cm_min=0.2,
-                pm25=42.0,
-                pm10=65.0,
-                temperature_c=26.5,
-                humidity=58.0,
-                wind_speed=11.2,
-                wind_dir=45.0,
-                smoke_index=2.1,
+                water_level_cm=485.0 if code == "PHY-03" else (340.0 if is_flood_critical else 165.0),
+                water_rate_cm_min=1.8 if is_flood_critical else 0.1,
+                pm25=28.0,
+                pm10=45.0,
+                temperature_c=27.5,
+                humidity=89.0,
+                wind_speed=18.5,
+                wind_dir=195.0,
+                smoke_index=0.8,
                 raw_bytes=2400,
                 tx_bytes=128
             )
             db.add(reading)
 
+            t_record = TelemetryRecord(
+                node_id=code,
+                timestamp=datetime.utcnow(),
+                water_level_m=4.85 if code in ["PHY-02", "PHY-03", "NODE-03"] else (3.40 if is_flood_critical else 1.65),
+                water_rate_of_change=1.8 if is_flood_critical else 0.05,
+                temperature_c=27.5,
+                humidity_pct=89.0,
+                wind_speed_kmh=18.5,
+                wind_direction_deg=195.0,
+                pm25=28.0,
+                pm10=45.0,
+                mesh_hops=node.mesh_level
+            )
+            db.add(t_record)
+
         db.commit()
-        print("\nDatabase seeded successfully!")
+        print("\nAssam 16 June Incident Database seeded successfully!")
         print(f"  Total Nodes: {len(created_nodes)} (5 Physical + 15 Simulated)")
-        print(f"  Contacts: {len(contacts_data)}")
+        print(f"  Contacts & Shelters: {len(contacts_data)}")
         print(f"  Hazard Zones: {len(zones_data)}")
         print(f"  Subscribers: {len(subscribers_data)}")
         print("  Demo Users:")
@@ -340,4 +475,5 @@ def seed_database():
         db.close()
 
 if __name__ == "__main__":
-    seed_database()
+    force_run = "--force" in sys.argv or "-f" in sys.argv
+    seed_database(force=force_run)

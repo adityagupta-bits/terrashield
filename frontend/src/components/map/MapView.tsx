@@ -21,8 +21,8 @@ export const MapView: React.FC<MapViewProps> = ({
   onSelectNode,
   zonesGeoJson,
   shelters = [],
-  center = [30.0869, 78.2676],
-  zoom = 12
+  center = [26.1850, 91.7500],
+  zoom = 11
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);

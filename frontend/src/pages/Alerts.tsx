@@ -242,7 +242,7 @@ export const Alerts: React.FC = () => {
           isOpen={!!selectedAlertForSarpanch}
           onClose={() => setSelectedAlertForSarpanch(null)}
           incidentTitle={selectedAlertForSarpanch.title}
-          villageName={selectedAlertForSarpanch.location_name || 'Shivpuri Panchayat'}
+          villageName={selectedAlertForSarpanch.location_name || 'Kampur Revenue Circle (Assam)'}
         />
       )}
     </div>

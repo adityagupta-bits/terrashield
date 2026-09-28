@@ -137,7 +137,7 @@ export const MeshTopologyPage: React.FC = () => {
                         )}
                         <span>{node.node_id}</span>
                       </td>
-                      <td className="p-3 text-slate-300">{node.name || node.location_name || 'Rishikesh Basin'}</td>
+                      <td className="p-3 text-slate-300">{node.name || node.location_name || 'Brahmaputra - Kopili Basin (Assam)'}</td>
                       <td className="p-3 font-mono text-slate-400">{node.node_type}</td>
                       <td className="p-3">
                         <span

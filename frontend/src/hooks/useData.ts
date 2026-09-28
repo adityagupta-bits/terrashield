@@ -41,7 +41,7 @@ export function useContacts(near?: string, category?: string) {
   });
 }
 
-export function useWeather(lat = 30.0869, lng = 78.2676) {
+export function useWeather(lat = 26.1850, lng = 91.7500) {
   return useQuery({
     queryKey: ['weather', lat, lng],
     queryFn: () => api.getCurrentWeather(lat, lng),

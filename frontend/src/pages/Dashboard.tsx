@@ -37,7 +37,7 @@ export const Dashboard: React.FC = () => {
     try {
       await api.deployNdrf(id);
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
-      alert('🚨 NDRF Battalion 8 dispatched to incident coordinates!');
+      alert('🚨 NDRF 1st Battalion (Patgaon Guwahati) dispatched to incident coordinates!');
     } catch (e: any) {
       alert(`Error: ${e.message}`);
     }
@@ -106,7 +106,7 @@ export const Dashboard: React.FC = () => {
         <div className="lg:col-span-2 bg-slate-900/90 border border-slate-800 rounded-xl overflow-hidden flex flex-col shadow-lg">
           <div className="bg-slate-950/80 px-4 py-2.5 border-b border-slate-800 flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-200">Rishikesh - Haridwar Multi-Hazard Grid</span>
+              <span className="font-semibold text-slate-200">Brahmaputra - Kopili Basin Grid (Assam 16 June Incident)</span>
               <span className="text-slate-500">|</span>
               <span className="text-slate-400 font-mono">EPSG:4326 PostGIS Layer</span>
             </div>
@@ -241,7 +241,7 @@ export const Dashboard: React.FC = () => {
             setSelectedAlertForSarpanch(null);
           }}
           incidentTitle={selectedAlertForSarpanch.title}
-          villageName={selectedAlertForSarpanch.location_name || 'Shivpuri Panchayat'}
+          villageName={selectedAlertForSarpanch.location_name || 'Kampur Revenue Circle (Assam)'}
         />
       )}
     </div>

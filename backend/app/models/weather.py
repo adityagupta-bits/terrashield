@@ -6,7 +6,7 @@ class WeatherObservation(Base):
     __tablename__ = "weather_observations"
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    region = Column(String(100), default="Rishikesh-Garhwal Catchment")
+    region = Column(String(100), default="Brahmaputra & Kopili Basin, Assam (16 June Incident)")
     ts = Column(DateTime, default=datetime.utcnow, index=True)
     temp_c = Column(Float, nullable=True)
     humidity = Column(Float, nullable=True)
@@ -17,7 +17,7 @@ class WeatherForecast(Base):
     __tablename__ = "weather_forecasts"
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    region = Column(String(100), default="Rishikesh-Garhwal Catchment")
+    region = Column(String(100), default="Brahmaputra & Kopili Basin, Assam (16 June Incident)")
     forecast_time = Column(DateTime, nullable=False, index=True)
     temp_c = Column(Float, nullable=False)
     rainfall_mm = Column(Float, default=0.0)

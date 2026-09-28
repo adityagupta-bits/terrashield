@@ -62,7 +62,7 @@ cd frontend && npm run build
 
 ### Step 1: Show Baseline Multi-Node Mesh Monitoring
 1. Open [http://localhost:5173](http://localhost:5173).
-2. Point out the **20 active nodes** (5 physical hardware nodes marked with green `PHY` badges + 15 mesh relays) across the Rishikesh-Garhwal catchment basin.
+2. Point out the **20 active nodes** (5 physical hardware nodes marked with green `PHY` badges + 15 mesh relays) across the Brahmaputra & Kopili River Basin (Assam 16 June Incident).
 3. Show the **GIS Incident & Threat Map** with live color-coded node markers, GeoJSON hazard polygons, and designated safe shelters.
 4. Click on any node or **"Mesh Topology"** in the sidebar:
    - Point out battery levels, RSSI, and multi-hop relay edges.

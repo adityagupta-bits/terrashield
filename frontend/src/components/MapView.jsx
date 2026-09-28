@@ -19,10 +19,10 @@ export default function MapView({
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
-    const defaultCenter = [30.0869, 78.2676]; // Rishikesh-Garhwal catchment
+    const defaultCenter = [26.1850, 91.7500]; // Brahmaputra & Kopili River Basin, Assam (16 June Incident)
     const map = L.map(mapContainerRef.current, {
       center: defaultCenter,
-      zoom: 12,
+      zoom: 11,
       zoomControl: false,
       attributionControl: false
     });
@@ -212,7 +212,7 @@ export default function MapView({
         iconAnchor: [15, 15]
       });
 
-      const marker = L.marker([node.latitude || 30.0869, node.longitude || 78.2676], { icon: nodeIcon });
+      const marker = L.marker([node.latitude || 26.1850, node.longitude || 91.7500], { icon: nodeIcon });
 
       marker.on('click', () => {
         if (onSelectNode) onSelectNode(node.id);
@@ -236,7 +236,7 @@ export default function MapView({
 
   const handleResetCenter = () => {
     if (mapInstanceRef.current) {
-      mapInstanceRef.current.flyTo([30.0869, 78.2676], 12, { duration: 1.2 });
+      mapInstanceRef.current.flyTo([26.1850, 91.7500], 11, { duration: 1.2 });
     }
   };
 

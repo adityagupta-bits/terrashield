@@ -219,7 +219,7 @@ export default function App() {
               </div>
 
               <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                Region: <b style={{ color: '#0f172a' }}>Rishikesh-Garhwal Catchment</b> • 20 Distributed Nodes
+                Region: <b style={{ color: '#0f172a' }}>Brahmaputra & Kopili Basin, Assam (16 June Incident)</b> • 20 Distributed Nodes
               </div>
             </div>
 

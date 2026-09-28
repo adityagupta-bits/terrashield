@@ -25,6 +25,7 @@ def load_history_csv(path: Optional[str] = None, date_col: str = "date") -> pd.D
     if path is None or not os.path.exists(path):
         # Check standard locations
         search_paths = [
+            Path(__file__).parent.parent.parent / "data" / "assam_weather_2years.csv",
             Path(__file__).parent.parent.parent.parent / "risk forecaster" / "sample_data_2years.csv",
             Path(__file__).parent / "data" / "sample_data_2years.csv",
             Path("risk forecaster/sample_data_2years.csv"),

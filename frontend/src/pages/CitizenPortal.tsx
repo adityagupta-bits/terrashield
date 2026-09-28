@@ -3,11 +3,11 @@ import { api } from '../../api/client';
 import { useQuery } from '@tanstack/react-query';
 
 const VILLAGE_LOCATIONS = [
-  { name: 'Shivpuri Riverbed', lat: 30.1350, lng: 78.3880 },
-  { name: 'Tapovan Ghat', lat: 30.1280, lng: 78.3240 },
-  { name: 'Byasi Gorge', lat: 30.0869, lng: 78.2676 },
-  { name: 'Muni Ki Reti', lat: 30.1150, lng: 78.3100 },
-  { name: 'Chilla Range Border', lat: 29.9800, lng: 78.2200 }
+  { name: 'Kampur Kopili Riverfront (Nagaon)', lat: 26.0520, lng: 92.7750 },
+  { name: 'Raha Kopili Confluence (Nagaon)', lat: 26.2200, lng: 92.5200 },
+  { name: 'Pandu Port Brahmaputra (Guwahati)', lat: 26.1820, lng: 91.7150 },
+  { name: 'Palashbari Embankment (Kamrup)', lat: 26.1300, lng: 91.5000 },
+  { name: 'Saraighat North Bank (Kamrup)', lat: 26.1860, lng: 91.6980 }
 ];
 
 export const CitizenPortal: React.FC = () => {

@@ -10,10 +10,10 @@ class Settings(BaseModel):
     # Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./terrashield.db")
     
-    # Default Region Center (Rishikesh / Ganga Basin, Uttarakhand)
-    DEFAULT_LAT: float = 30.0869
-    DEFAULT_LNG: float = 78.2676
-    DEFAULT_REGION_NAME: str = "Rishikesh-Garhwal Catchment"
+    # Default Region Center (Brahmaputra & Kopili Basin, Assam - 16 June Flood Deluge)
+    DEFAULT_LAT: float = 26.1850
+    DEFAULT_LNG: float = 91.7500
+    DEFAULT_REGION_NAME: str = "Brahmaputra & Kopili Basin, Assam (16 June Incident)"
     
     # Flood Thresholds (meters)
     FLOOD_NORMAL_MAX: float = 2.5

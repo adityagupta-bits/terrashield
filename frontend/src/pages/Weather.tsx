@@ -44,7 +44,7 @@ export const Weather: React.FC = () => {
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-400">Model:</span>
           <span className="text-xs font-mono bg-slate-800 text-cyan-300 border border-slate-700 px-2.5 py-1 rounded-md">
-            GradientBoosting 72h
+            Assam 2-Year Calibrated Model
           </span>
         </div>
       </div>
@@ -56,7 +56,7 @@ export const Weather: React.FC = () => {
           <div className="text-2xl font-bold font-mono text-amber-400 mt-1">
             {isCurrentLoading ? '...' : `${current?.temperature_c?.toFixed(1) ?? '28.4'}°C`}
           </div>
-          <div className="text-[10px] text-slate-500 mt-0.5">Upper Ganges Valley</div>
+          <div className="text-[10px] text-slate-500 mt-0.5">Brahmaputra Valley (Assam)</div>
         </div>
 
         <div className="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
@@ -325,9 +325,9 @@ export const Weather: React.FC = () => {
       <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex items-start gap-3">
         <span className="text-2xl">📋</span>
         <div className="space-y-1 text-xs">
-          <div className="font-semibold text-white">Meteorological Guidance & Early Action Protocol</div>
+          <div className="font-semibold text-white">Meteorological Guidance & Early Action Protocol (Assam 16 June Deluge)</div>
           <p className="text-slate-300 leading-relaxed">
-            The 72-hour forecast indicates a sustained rain belt approaching Uttarakhand between +24h and +48h. River baseline is projected to rise from 1.5m to 3.2m at the Byasi gauge. Civil teams are advised to verify riverbed clearings and maintain VHF mesh relays in standby.
+            The 72-hour forecast is calibrated against 2 years of Assam weather data (2024–2026), reflecting the extreme 16 June monsoon surge. River Kopili reached 4.85m at Kampur (breaching the 4.75m HFL). Civil teams, ASDMA, and NDRF 1st Bn are advised to maintain active evacuation corridors and decentralized mesh relays.
           </p>
         </div>
       </div>

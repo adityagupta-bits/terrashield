@@ -3,10 +3,10 @@ import { api } from '../../api/client';
 import { useQuery } from '@tanstack/react-query';
 
 const PRESET_ZONES = [
-  { name: 'Shivpuri River Basin', lat: 30.1350, lng: 78.3880, radius: 10 },
-  { name: 'Tapovan / Lakshman Jhula', lat: 30.1280, lng: 78.3240, radius: 5 },
-  { name: 'Byasi Flash-Flood Gorge', lat: 30.0869, lng: 78.2676, radius: 12 },
-  { name: 'Chilla Forest Range', lat: 29.9800, lng: 78.2200, radius: 15 }
+  { name: 'Kampur Kopili River Basin (Assam)', lat: 26.0520, lng: 92.7750, radius: 15 },
+  { name: 'Raha Kopili Confluence (Nagaon)', lat: 26.2200, lng: 92.5200, radius: 10 },
+  { name: 'Pandu Port Brahmaputra Bank (Guwahati)', lat: 26.1820, lng: 91.7150, radius: 8 },
+  { name: 'Palashbari River Embankment (Kamrup)', lat: 26.1300, lng: 91.5000, radius: 12 }
 ];
 
 const TEMPLATES = [
@@ -41,8 +41,8 @@ const TEMPLATES = [
 ];
 
 export const Broadcast: React.FC = () => {
-  const [lat, setLat] = useState(30.0869);
-  const [lng, setLng] = useState(78.2676);
+  const [lat, setLat] = useState(26.1850);
+  const [lng, setLng] = useState(91.7500);
   const [radiusKm, setRadiusKm] = useState(10);
   const [selectedTemplateId, setSelectedTemplateId] = useState('FLASH_FLOOD_EVACUATION');
   const [isSending, setIsSending] = useState(false);

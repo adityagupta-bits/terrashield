@@ -15,15 +15,15 @@ export const SarpanchChatModal: React.FC<Props> = ({
   isOpen,
   onClose,
   verificationId = 1,
-  incidentTitle = 'Flash Flood Alert at Shivpuri River Bed',
-  sarpanchName = 'Gram Pradhan Rameshwar Sharma',
-  villageName = 'Shivpuri Panchayat'
+  incidentTitle = 'Kampur Kopili River Surge & Embankment Breach (16 June Assam Flood)',
+  sarpanchName = 'Gaonburah Bhupen Saikia',
+  villageName = 'Kampur Revenue Circle (Nagaon)'
 }) => {
   const queryClient = useQueryClient();
   const [messages, setMessages] = useState<Array<{ sender: 'system' | 'sarpanch'; text: string; time: string }>>([
     {
       sender: 'system',
-      text: `🚨 *TERRA SHIELD EARLY WARNING ALERT*\n\nNamaste ${sarpanchName},\nAutomated sensors at Node PHY-01 detected rapid water level surge (3.82m) near ${villageName}.\n\nPlease reply with current ground status:\n1️⃣ Confirmed: Water entering village\n2️⃣ False alarm: Water receding\n3️⃣ Critical: Immediate evacuation needed`,
+      text: `🚨 *TERRA SHIELD EARLY WARNING ALERT*\n\nNamaste ${sarpanchName},\nAutomated sensors at Node PHY-03 detected critical water level surge (4.85m - HFL Exceeded) near ${villageName}.\n\nPlease reply with current ground status:\n1️⃣ Confirmed: Water entering village\n2️⃣ False alarm: Water receding\n3️⃣ Critical: Immediate evacuation needed`,
       time: 'Just now'
     }
   ]);
@@ -56,7 +56,7 @@ export const SarpanchChatModal: React.FC<Props> = ({
           ...prev,
           {
             sender: 'system',
-            text: `✅ *Ground-Truth Verified and Recorded.*\nIncident updated to: *${res.new_status || 'CONFIRMED'}*.\nCommand Center & NDRF unit informed. Thank you for your swift response, Pradhan ji.`,
+            text: `✅ *Ground-Truth Verified and Recorded.*\nIncident updated to: *${res.new_status || 'CONFIRMED'}*.\nASDMA Command Center & NDRF 1st Bn unit informed. Thank you for your swift response, Gaonburah ji.`,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
         ]);

@@ -8,9 +8,9 @@ import os
 # OpenWeather API (optional, can be passed via environment or settings)
 OPENWEATHER_API_KEY = os.environ.get("OPENWEATHER_API_KEY", "")
 
-# Default coordinates: Rishikesh-Garhwal catchment area (Upper Ganges basin)
-DEFAULT_LAT = 30.0869
-DEFAULT_LON = 78.2676
+# Default coordinates: Brahmaputra & Kopili River Basin, Assam (16 June Incident)
+DEFAULT_LAT = 26.1850
+DEFAULT_LON = 91.7500
 
 ONECALL_URL = "https://api.openweathermap.org/data/3.0/onecall"
 ONECALL_TIMEMACHINE_URL = "https://api.openweathermap.org/data/3.0/onecall/timemachine"

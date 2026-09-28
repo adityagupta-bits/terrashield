@@ -62,10 +62,10 @@ export const Sidebar: React.FC = () => {
       <div className="p-3 border-t border-slate-800/80 hidden md:block">
         <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
           <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Deployment Basin</p>
-          <p className="text-xs font-bold text-slate-200 mt-0.5 truncate">Rishikesh - Garhwal</p>
+          <p className="text-xs font-bold text-slate-200 mt-0.5 truncate">Assam (16 June Incident)</p>
           <p className="text-[10px] text-emerald-400 flex items-center gap-1 mt-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            Ganga River Catchment
+            Brahmaputra - Kopili Basin
           </p>
         </div>
       </div>

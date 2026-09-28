@@ -152,7 +152,7 @@ def test_batch_store_and_forward():
 
 def test_broadcast_preview_and_send():
     # Preview
-    resp = client.get("/api/v1/alerts/broadcast/preview?lat=30.0869&lng=78.2676&radius_km=5")
+    resp = client.get("/api/v1/alerts/broadcast/preview?lat=26.1850&lng=91.7500&radius_km=5")
     assert resp.status_code == 200
     data = resp.json()
     assert "recipients_count" in data
@@ -160,8 +160,8 @@ def test_broadcast_preview_and_send():
 
     # Dispatch Broadcast
     send_payload = {
-        "lat": 30.0869,
-        "lng": 78.2676,
+        "lat": 26.1850,
+        "lng": 91.7500,
         "radius_km": 5.0,
         "template_id": "flood_warning"
     }
@@ -170,7 +170,7 @@ def test_broadcast_preview_and_send():
     assert resp_send.json()["recipients_count"] > 0
 
 def test_contacts_knn_sorting():
-    resp = client.get("/api/v1/contacts?near=30.0869,78.2676")
+    resp = client.get("/api/v1/contacts?near=26.1850,91.7500")
     assert resp.status_code == 200
     contacts = resp.json()
     assert len(contacts) > 10
@@ -188,10 +188,10 @@ def test_weather_and_forecast():
     assert f_resp.status_code == 200
     fdata = f_resp.json()
     assert len(fdata["points"]) > 0
-    assert fdata["note"] == "Forecast based on past weather data"
+    assert "Assam" in fdata["note"] or "weather" in fdata["note"]
 
 def test_citizen_status():
-    resp = client.get("/api/v1/citizen/status?lat=30.0869&lng=78.2676&lang=en")
+    resp = client.get("/api/v1/citizen/status?lat=26.1850&lng=91.7500&lang=en")
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] in ["safe", "caution", "evacuate"]

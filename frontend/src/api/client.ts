@@ -128,7 +128,7 @@ class ApiClient {
   }
 
   // Weather
-  async getCurrentWeather(lat = 30.0869, lng = 78.2676): Promise<WeatherCurrent> {
+  async getCurrentWeather(lat = 26.1850, lng = 91.7500): Promise<WeatherCurrent> {
     return this.request<WeatherCurrent>(`/api/v1/weather/current?lat=${lat}&lng=${lng}`);
   }
 
@@ -136,8 +136,13 @@ class ApiClient {
     return this.request<WeatherForecastData>('/api/v1/weather/forecast');
   }
 
-  async getMultiHazardRisk(horizonDays = 7, lat = 30.0869, lng = 78.2676): Promise<MultiHazardRiskData> {
+  async getMultiHazardRisk(horizonDays = 7, lat = 26.1850, lng = 91.7500): Promise<MultiHazardRiskData> {
     return this.request<MultiHazardRiskData>(`/api/v1/weather/multi-hazard-risk?horizon_days=${horizonDays}&lat=${lat}&lng=${lng}`);
+  }
+
+  async getHistoricalWeather(limit = 100): Promise<any> {
+    return this.request<any>(`/api/v1/weather/historical?limit=${limit}`);
+  }
   }
 
   // News

@@ -8,6 +8,7 @@ from app.schemas import SimulationTriggerRequest
 from app.alert_dispatcher import alert_dispatcher
 from app.mesh_manager import mesh_manager
 from app.websocket_manager import ws_manager
+from app.ai_engine import ai_engine
 
 router = APIRouter(prefix="/simulation", tags=["Hackathon Simulation & Demo Sandbox"])
 
@@ -16,32 +17,32 @@ def get_available_scenarios():
     return [
         {
             "id": "FLASH_FLOOD",
-            "name": "Extreme Flash Flood Surge",
-            "description": "Simulates cloudburst upstream in Shivpuri-Byasi canyon. River surges +1.9m in 30 mins, triggering predictive AI flash flood alert and automated WhatsApp message to village Sarpanch.",
-            "target_default": "NODE-03"
+            "name": "Extreme Flash Flood Surge (Assam 16 June Deluge)",
+            "description": "Simulates extreme Kopili River monsoon surge at Kampur (16 June Assam Flood). River surges to 4.85m breaching HFL (4.75m), triggering predictive AI flood alarm and automated WhatsApp message to Gaonburah Bhupen Saikia.",
+            "target_default": "PHY-03"
         },
         {
             "id": "WILDFIRE",
-            "name": "Chilla Forest Wildfire Hotspot",
-            "description": "Simulates 44°C heatwave, 11% humidity, and 30 km/h south-westerly wind at Rajaji-Chilla range. Triggers McArthur FFDI calculations and dynamic directional fire spread cone.",
-            "target_default": "NODE-07"
+            "name": "Foothill Slope Warning & Landslide Risk",
+            "description": "Simulates heavy rain-induced soil saturation and slope instability along North Guwahati / Karbi Anglong slopes (Node NODE-08).",
+            "target_default": "NODE-08"
         },
         {
             "id": "POLLUTION_SPIKE",
-            "name": "Severe AQI Smog Emergency",
-            "description": "Simulates localized agricultural residue burning & thermal inversion causing PM2.5 to spike to 345 ug/m3. Triggers automated public health advisory.",
+            "name": "Industrial AQI Smog Emergency",
+            "description": "Simulates thermal inversion and particulate accumulation around Noonmati Refinery sector causing PM2.5 to spike to 348 ug/m3.",
             "target_default": "NODE-13"
         },
         {
             "id": "CELLULAR_BLACKOUT",
             "name": "Cellular Tower Blackout & Mesh Failover",
-            "description": "Simulates total cellular infrastructure outage. Primary GSM gateway fails; nodes dynamically reroute packets across decentralized multi-hop LoRa mesh to emergency backup sink.",
+            "description": "Simulates total cellular infrastructure outage across flood-inundated circles. Primary GSM gateway fails; nodes dynamically reroute packets across decentralized multi-hop LoRa mesh to emergency backup sink.",
             "target_default": "ALL"
         },
         {
             "id": "RESET",
             "name": "Reset to Safe Baseline",
-            "description": "Restores all river levels to 1.6m normal, clears active disaster alerts, and restores normal hybrid cellular connectivity.",
+            "description": "Restores all river levels to safe monsoonal baseline (1.65m), clears active disaster alerts, and restores normal hybrid cellular connectivity.",
             "target_default": "ALL"
         }
     ]
@@ -52,19 +53,19 @@ async def trigger_simulation_scenario(req: SimulationTriggerRequest, db: Session
     scenario = req.scenario.upper()
 
     if scenario == "FLASH_FLOOD":
-        target_id = req.target_node_id or "NODE-03"
+        target_id = req.target_node_id or "PHY-03"
         node = db.query(SensorNode).filter(SensorNode.id == target_id).first()
         if not node:
             node = db.query(SensorNode).filter(SensorNode.hazard_type == "flood").first()
         
-        # Inject extreme water surge
+        # Inject extreme water surge (Assam 16 June Incident: Kopili at Kampur 4.85m)
         record = TelemetryRecord(
             node_id=node.id,
             timestamp=datetime.utcnow(),
             water_level_m=4.85,
             water_rate_of_change=1.92,
-            temperature_c=24.0,
-            humidity_pct=92.0,
+            temperature_c=25.5,
+            humidity_pct=94.0,
             wind_speed_kmh=18.0,
             mesh_hops=node.hop_count
         )
@@ -76,12 +77,17 @@ async def trigger_simulation_scenario(req: SimulationTriggerRequest, db: Session
             db=db,
             hazard_type="FLOOD",
             severity="EMERGENCY",
-            title=f"Flash Flood Surge Warning - {node.name}",
-            description=f"Rapid upstream surge of 1.92m in 30 minutes! River level at 4.85m (Breaching 4.0m critical mark). AI model predicts overflow within 35 minutes.",
+            title=f"Kopili River Surge & Breach Alert - {node.name}",
+            description=f"Rapid upstream surge of 1.92m in 30 minutes! Kopili river gauge at 4.85m (Breached Highest Flood Level 4.75m). Overtopping embankment across Kampur circle.",
             location_name=node.name,
             latitude=node.latitude,
             longitude=node.longitude,
-            radius_km=4.5
+            radius_km=15.0
+        )
+
+        ai_res = ai_engine.forecast_flood(
+            current_water_level=4.85,
+            rate_of_change_30m=1.92
         )
 
         return {
@@ -89,7 +95,11 @@ async def trigger_simulation_scenario(req: SimulationTriggerRequest, db: Session
             "scenario": "FLASH_FLOOD",
             "node_id": node.id,
             "alert_id": alert.id,
-            "message": f"Flash flood injected at {node.name}. WhatsApp Sarpanch verification dispatched!"
+            "model_type": "ARIMA(2,1,1) + Residual Anomaly",
+            "anomaly_z_score": ai_res.get("anomaly_z_score"),
+            "residual_error_m": ai_res.get("residual_error"),
+            "time_to_overflow_mins": ai_res.get("time_to_overflow_mins", 35),
+            "message": f"Kopili flood deluge injected at {node.name}. WhatsApp Gaonburah verification dispatched!"
         }
 
     elif scenario == "WILDFIRE":
@@ -123,11 +133,24 @@ async def trigger_simulation_scenario(req: SimulationTriggerRequest, db: Session
             radius_km=5.5
         )
 
+        fire_vector = ai_engine.calculate_wildfire_spread(
+            lat=node.latitude,
+            lon=node.longitude,
+            temp_c=44.2,
+            humidity_pct=11.5,
+            wind_speed_kmh=31.0,
+            wind_direction_deg=225.0
+        )
+
         return {
             "status": "triggered",
             "scenario": "WILDFIRE",
             "node_id": node.id,
             "alert_id": alert.id,
+            "model_type": "McArthur Mark 5 FFDI",
+            "fire_danger_index": fire_vector.fire_danger_index,
+            "propagation_speed_kmh": fire_vector.propagation_speed_kmh,
+            "bearing_degrees": fire_vector.bearing_degrees,
             "message": f"Wildfire outbreak injected at {node.name}. Directional spread vector calculated!"
         }
 
@@ -162,11 +185,16 @@ async def trigger_simulation_scenario(req: SimulationTriggerRequest, db: Session
             radius_km=4.0
         )
 
+        aqi_res = ai_engine.analyze_pollution_spike(pm25=348.0, pm10=495.0)
+
         return {
             "status": "triggered",
             "scenario": "POLLUTION_SPIKE",
             "node_id": node.id,
             "alert_id": alert.id,
+            "model_type": "Thermal Inversion AQI Window",
+            "severity": aqi_res.get("severity"),
+            "advisory_window_hours": aqi_res.get("window_hours"),
             "message": f"AQI smog spike injected at {node.name}."
         }
 

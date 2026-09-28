@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Shield, AlertTriangle, MapPin, PhoneCall, CheckCircle, Navigation, Users, Info, Radio, Smartphone, AlertOctagon, HeartHandshake } from 'lucide-react';
 
 export default function CitizenView({ alerts = [], shelters = [], onOpenWhatsApp }) {
-  const [selectedLocation, setSelectedLocation] = useState('shivpuri');
+  const [selectedLocation, setSelectedLocation] = useState('kampur');
   const [lang, setLang] = useState('hi'); // 'hi' | 'en'
   const [activeCategory, setActiveCategory] = useState('FLOOD');
   const [sosSent, setSosSent] = useState(false);
@@ -10,31 +10,31 @@ export default function CitizenView({ alerts = [], shelters = [], onOpenWhatsApp
   const activeAlerts = alerts.filter(a => a.is_active);
   const hasCriticalAlert = activeAlerts.some(a => a.severity === 'EMERGENCY' || a.severity === 'CRITICAL');
 
-  // Locations for citizen testing
+  // Locations for citizen testing (Assam 16 June Incident)
   const locations = {
-    shivpuri: {
-      name: 'Shivpuri Riverfront Sector (शिवपुरी नदी तट)',
+    kampur: {
+      name: 'Kampur Kopili Riverfront (कामपुर कोपिली तटबंध - 16 June Peak)',
       zoneType: 'HIGH_RISK',
-      hazard: 'Flash Flood Threat (+1.92m river surge upstream)',
-      evacuationRoute: 'Route NH-58 North towards GIC High Grounds (2.4 km)',
-      lat: 30.1319,
-      lng: 78.2896
+      hazard: 'Extreme Flood Deluge (River Kopili 4.85m breached 4.75m HFL)',
+      evacuationRoute: 'Route towards Kampur Higher Secondary School Relief Camp (1.1 km)',
+      lat: 26.0520,
+      lng: 92.7750
     },
-    chilla: {
-      name: 'Chilla Forest Range Sector (चीला वन क्षेत्र)',
+    pandu: {
+      name: 'Pandu Port Brahmaputra Bank (पांडु पोर्ट ब्रह्मपुत्र तट)',
       zoneType: 'MODERATE_RISK',
-      hazard: 'Forest Thermal Hotspot (44°C Hotspot Watch)',
-      evacuationRoute: 'Exit towards Haridwar-Rishikesh Bypass Road (3.8 km)',
-      lat: 30.0449,
-      lng: 78.2326
+      hazard: 'Brahmaputra Flood Surge Watch (49.60m gauge mark)',
+      evacuationRoute: 'Exit towards Cotton Collegiate HS / Maligaon Highland (2.5 km)',
+      lat: 26.1820,
+      lng: 91.7150
     },
-    town: {
-      name: 'Rishikesh Central Town (ऋषिकेश मुख्य नगर)',
+    dispur: {
+      name: 'Dispur Central & GMCH Zone (दिसपुर मुख्य क्षेत्र)',
       zoneType: 'SAFE',
-      hazard: 'Normal Safe Baseline (No active surge detected)',
+      hazard: 'Normal Safe Baseline (No active embankment breach)',
       evacuationRoute: 'Designated safe relief shelters on standby',
-      lat: 30.0869,
-      lng: 78.2676
+      lat: 26.1400,
+      lng: 91.7900
     }
   };
 
@@ -103,8 +103,8 @@ export default function CitizenView({ alerts = [], shelters = [], onOpenWhatsApp
           </h2>
           <p className="citizen-main-desc">
             {lang === 'hi' 
-              ? 'ऋषिकेश-गढ़वाल क्षेत्र के नागरिकों हेतु अति-स्थानीय जीआईएस चेतावनी, निकटतम सुरक्षित आश्रय स्थल एवं आपातकालीन सहायता।'
-              : 'Hyper-local GIS hazard warnings, real-time safe evacuation shelter locator, and 24x7 emergency assistance for citizens across the Rishikesh-Garhwal catchment.'}
+              ? 'असम (काम्पूर-कोपिली एवं ब्रह्मपुत्र) क्षेत्र के नागरिकों हेतु अति-स्थानीय जीआईएस चेतावनी, निकटतम सुरक्षित आश्रय स्थल एवं आपातकालीन सहायता।'
+              : 'Hyper-local GIS hazard warnings, real-time safe evacuation shelter locator, and 24x7 emergency assistance for citizens across the Brahmaputra & Kopili river basin (Assam 16 June Incident).'}
           </p>
         </div>
 

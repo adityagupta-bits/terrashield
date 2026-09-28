@@ -46,33 +46,38 @@ def seed_default_nodes_and_shelters(db: Session = Depends(get_db)):
     if db.query(SensorNode).count() > 0:
         return {"status": "already_seeded", "node_count": db.query(SensorNode).count()}
 
-    # Base coords: Rishikesh / Ganga - Chandrabhaga River Basin
+    # Base coords: Brahmaputra & Kopili River Basin, Assam (16 June Incident)
     base_lat = settings.DEFAULT_LAT
     base_lng = settings.DEFAULT_LNG
 
     nodes_data = [
-        # Gateway 1 (Cellular Uplink Node at Emergency Control HQ)
-        {"id": "GW-01", "name": "Main Control Station (GSM Sink)", "hazard_type": "multi", "lat": base_lat, "lng": base_lng, "is_gw": True, "hops": 0, "parent": None},
+        # Physical Hardware Sentinels (PHY-01 to PHY-05)
+        {"id": "PHY-01", "name": "Saraighat Brahmaputra River Sentry (Hardware)", "hazard_type": "flood", "lat": 26.1850, "lng": 91.7000, "is_gw": False, "hops": 1, "parent": "GW-01"},
+        {"id": "PHY-02", "name": "Kopili River Bridge Inundation Gauge (Hardware)", "hazard_type": "flood", "lat": 26.0500, "lng": 92.7800, "is_gw": False, "hops": 2, "parent": "PHY-01"},
+        {"id": "PHY-03", "name": "Kampur Embankment Critical Sentry (Hardware)", "hazard_type": "flood", "lat": 26.0800, "lng": 92.7400, "is_gw": False, "hops": 3, "parent": "PHY-02"},
+        {"id": "PHY-04", "name": "Deepor Beel Catchment Water Watch (Hardware)", "hazard_type": "flood", "lat": 26.1200, "lng": 91.6600, "is_gw": False, "hops": 1, "parent": "GW-01"},
+        {"id": "PHY-05", "name": "Pandu Port Hydrological Telemetry Post (Hardware)", "hazard_type": "flood", "lat": 26.1820, "lng": 91.7150, "is_gw": False, "hops": 1, "parent": "GW-01"},
+
+        # Gateway 1 (ASDMA State Disaster Ops Center)
+        {"id": "GW-01", "name": "ASDMA State Disaster Ops Center (GSM Sink)", "hazard_type": "multi", "lat": 26.1450, "lng": 91.7360, "is_gw": True, "hops": 0, "parent": None},
         
-        # River Flood Catchment Sensor Nodes
-        {"id": "NODE-01", "name": "Ganga Barrage River Gauge", "hazard_type": "flood", "lat": base_lat + 0.012, "lng": base_lng - 0.008, "is_gw": False, "hops": 1, "parent": "GW-01"},
-        {"id": "NODE-02", "name": "Chandrabhaga Confluence Sensor", "hazard_type": "flood", "lat": base_lat + 0.024, "lng": base_lng - 0.015, "is_gw": False, "hops": 2, "parent": "NODE-01"},
-        {"id": "NODE-03", "name": "Shivpuri Upstream Gauge", "hazard_type": "flood", "lat": base_lat + 0.045, "lng": base_lng + 0.022, "is_gw": False, "hops": 3, "parent": "NODE-02"},
-        {"id": "NODE-04", "name": "Byasi Canyon Flood Sentinel", "hazard_type": "flood", "lat": base_lat + 0.065, "lng": base_lng + 0.038, "is_gw": False, "hops": 4, "parent": "NODE-03"},
-        {"id": "NODE-05", "name": "Devprayag Confluence Watch", "hazard_type": "flood", "lat": base_lat + 0.095, "lng": base_lng + 0.055, "is_gw": False, "hops": 5, "parent": "NODE-04"},
+        # River Flood Catchment Sensor Nodes (Assam 16 June Incident Corridor)
+        {"id": "NODE-01", "name": "Saraighat Brahmaputra River Gauge", "hazard_type": "flood", "lat": 26.1860, "lng": 91.6980, "is_gw": False, "hops": 1, "parent": "GW-01"},
+        {"id": "NODE-02", "name": "Pandu Hydrological Monitoring Post", "hazard_type": "flood", "lat": 26.1800, "lng": 91.7120, "is_gw": False, "hops": 2, "parent": "NODE-01"},
+        {"id": "NODE-03", "name": "Kampur Town Kopili River Sensor", "hazard_type": "flood", "lat": 26.0520, "lng": 92.7750, "is_gw": False, "hops": 3, "parent": "NODE-02"},
+        {"id": "NODE-04", "name": "Raha Kopili Confluence Sentinel", "hazard_type": "flood", "lat": 26.2200, "lng": 92.5200, "is_gw": False, "hops": 4, "parent": "NODE-03"},
+        {"id": "NODE-05", "name": "Dharamtul Riverbed Telemetry Station", "hazard_type": "flood", "lat": 26.1500, "lng": 92.3500, "is_gw": False, "hops": 5, "parent": "NODE-04"},
+        {"id": "NODE-06", "name": "Palashbari Brahmaputra Embankment", "hazard_type": "flood", "lat": 26.1300, "lng": 91.5000, "is_gw": False, "hops": 1, "parent": "GW-01"},
+        {"id": "NODE-07", "name": "Sualkuchi North Bank Flood Watch", "hazard_type": "flood", "lat": 26.1700, "lng": 91.5700, "is_gw": False, "hops": 2, "parent": "NODE-06"},
+        {"id": "NODE-08", "name": "North Guwahati Hill Slope Sensor", "hazard_type": "landslide", "lat": 26.2100, "lng": 91.7200, "is_gw": False, "hops": 2, "parent": "NODE-01"},
+        {"id": "NODE-09", "name": "Sonapur Digaru River Sentry", "hazard_type": "flood", "lat": 26.1200, "lng": 91.9800, "is_gw": False, "hops": 1, "parent": "GW-01"},
+        {"id": "NODE-10", "name": "Morigaon Lowland Inundation Sensor", "hazard_type": "flood", "lat": 26.2500, "lng": 92.3400, "is_gw": False, "hops": 2, "parent": "NODE-09"},
         
-        # Forest Fire Monitoring Edge Nodes (Chilla / Rajaji Forest Range)
-        {"id": "NODE-06", "name": "Rajaji National Park Sector 1", "hazard_type": "fire", "lat": base_lat - 0.025, "lng": base_lng - 0.020, "is_gw": False, "hops": 1, "parent": "GW-01"},
-        {"id": "NODE-07", "name": "Chilla Forest Thermal Sentry", "hazard_type": "fire", "lat": base_lat - 0.042, "lng": base_lng - 0.035, "is_gw": False, "hops": 2, "parent": "NODE-06"},
-        {"id": "NODE-08", "name": "Kaudiyala Ridge (LoRa Satellite Backup)", "hazard_type": "fire", "lat": base_lat + 0.050, "lng": base_lng + 0.040, "is_gw": False, "hops": 2, "parent": "NODE-03"},
-        {"id": "NODE-09", "name": "Neelkanth Valley Fire Lookout", "hazard_type": "fire", "lat": base_lat - 0.018, "lng": base_lng + 0.030, "is_gw": False, "hops": 1, "parent": "GW-01"},
-        {"id": "NODE-10", "name": "Manikoot Ridge Acoustic Node", "hazard_type": "fire", "lat": base_lat - 0.035, "lng": base_lng + 0.045, "is_gw": False, "hops": 2, "parent": "NODE-09"},
-        
-        # Air Quality & Urban Smog Sentry Nodes
-        {"id": "NODE-11", "name": "Triveni Ghat Public AQI Node", "hazard_type": "pollution", "lat": base_lat + 0.005, "lng": base_lng - 0.005, "is_gw": False, "hops": 1, "parent": "GW-01"},
-        {"id": "NODE-12", "name": "AIIMS Rishikesh Health Zone Node", "hazard_type": "pollution", "lat": base_lat - 0.020, "lng": base_lng + 0.010, "is_gw": False, "hops": 1, "parent": "GW-01"},
-        {"id": "NODE-13", "name": "IDPL Industrial Area AQI Sentry", "hazard_type": "pollution", "lat": base_lat - 0.015, "lng": base_lng - 0.015, "is_gw": False, "hops": 2, "parent": "NODE-12"},
-        {"id": "NODE-14", "name": "Tapovan Tourist Belt Multi-Hazard", "hazard_type": "multi", "lat": base_lat + 0.030, "lng": base_lng + 0.015, "is_gw": False, "hops": 2, "parent": "NODE-01"},
+        # Urban & Industrial Sentinels
+        {"id": "NODE-11", "name": "Guwahati Central AQI & Weather Post", "hazard_type": "air", "lat": 26.1850, "lng": 91.7500, "is_gw": False, "hops": 1, "parent": "GW-01"},
+        {"id": "NODE-12", "name": "GMCH Emergency Zone Sensor", "hazard_type": "air", "lat": 26.1550, "lng": 91.7700, "is_gw": False, "hops": 1, "parent": "GW-01"},
+        {"id": "NODE-13", "name": "Noonmati Refinery AQI Sentry", "hazard_type": "air", "lat": 26.1950, "lng": 91.8000, "is_gw": False, "hops": 2, "parent": "NODE-12"},
+        {"id": "NODE-14", "name": "Dispur Capital Complex Multi-Hazard", "hazard_type": "multi", "lat": 26.1400, "lng": 91.7900, "is_gw": False, "hops": 2, "parent": "NODE-01"},
     ]
 
     for nd in nodes_data:
@@ -85,18 +90,19 @@ def seed_default_nodes_and_shelters(db: Session = Depends(get_db)):
             status="GATEWAY" if nd["is_gw"] else ("ONLINE" if nd["hops"] <= 1 else "MESH_RELAY"),
             parent_node_id=nd["parent"],
             hop_count=nd["hops"],
-            battery_pct=95.0,
-            signal_rssi=-55.0 - (nd["hops"] * 10),
+            battery_pct=96.0,
+            signal_rssi=-54.0 - (nd["hops"] * 8),
             is_gateway=nd["is_gw"]
         )
         db.add(node)
 
-    # Evacuation Shelters & Relief Camps
+    # Assam Evacuation Shelters & Relief Camps
     shelters_data = [
-        {"name": "Government Inter College Evacuation Shelter", "type": "SHELTER", "lat": base_lat + 0.008, "lng": base_lng + 0.005, "capacity": 600, "occupancy": 45},
-        {"name": "AIIMS Emergency Disaster Relief Wing", "type": "HOSPITAL", "lat": base_lat - 0.019, "lng": base_lng + 0.012, "capacity": 300, "occupancy": 80},
-        {"name": "Panchayat Bhavan High-Ground Relief Camp", "type": "RELIEF_CAMP", "lat": base_lat + 0.032, "lng": base_lng - 0.002, "capacity": 450, "occupancy": 20},
-        {"name": "Shri Bharat Mandir Relief Community Hall", "type": "SHELTER", "lat": base_lat + 0.010, "lng": base_lng - 0.010, "capacity": 500, "occupancy": 10},
+        {"name": "Cotton Collegiate HS Evacuation Camp", "type": "SHELTER", "lat": 26.1870, "lng": 91.7480, "capacity": 800, "occupancy": 210},
+        {"name": "Kampur Higher Secondary School Relief Camp", "type": "RELIEF_CAMP", "lat": 26.0530, "lng": 92.7760, "capacity": 650, "occupancy": 420},
+        {"name": "Raha College Flood Relief Center", "type": "RELIEF_CAMP", "lat": 26.2220, "lng": 92.5210, "capacity": 500, "occupancy": 195},
+        {"name": "GMCH Emergency Disaster Relief Wing", "type": "HOSPITAL", "lat": 26.1550, "lng": 91.7700, "capacity": 400, "occupancy": 65},
+        {"name": "Palashbari Relief Hall", "type": "SHELTER", "lat": 26.1320, "lng": 91.5020, "capacity": 450, "occupancy": 110},
     ]
 
     for sd in shelters_data:
@@ -107,7 +113,7 @@ def seed_default_nodes_and_shelters(db: Session = Depends(get_db)):
             longitude=sd["lng"],
             capacity=sd["capacity"],
             current_occupancy=sd["occupancy"],
-            contact_number="+91 1070 (Toll Free)",
+            contact_number="+91 1070 (ASDMA Toll Free)",
             is_open=True
         )
         db.add(shelter)

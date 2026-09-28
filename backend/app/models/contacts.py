@@ -14,7 +14,7 @@ class Contact(Base):
     name = Column(String(100), nullable=False)
     category = Column(String(30), nullable=False)      # authority, rescue, shelter, ngo, helpline
     phone = Column(String(30), nullable=False)
-    district = Column(String(50), default="Dehradun / Tehri Garhwal")
+    district = Column(String(50), default="Kamrup Metro / Nagaon (Assam)")
     capacity = Column(Integer, nullable=True)          # for shelters
     occupancy = Column(Integer, nullable=True)         # current occupancy
     location = Column(LocationPoint, nullable=True)

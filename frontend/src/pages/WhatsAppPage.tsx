@@ -5,16 +5,16 @@ export const WhatsAppPage: React.FC = () => {
   const [sarpanchModalOpen, setSarpanchModalOpen] = useState(false);
   const [selectedIncident, setSelectedIncident] = useState({
     id: 1,
-    title: 'Shivpuri Riverbed Flash Flood Inflow',
-    sarpanch: 'Gram Pradhan Rameshwar Sharma',
-    village: 'Shivpuri Panchayat'
+    title: 'Kampur Kopili River Surge & Embankment Breach (16 June Assam Flood)',
+    sarpanch: 'Gaonburah Bhupen Saikia',
+    village: 'Kampur Revenue Circle (Nagaon, Assam)'
   });
 
   // Citizen Bot State
   const [citizenMessages, setCitizenMessages] = useState<Array<{ sender: 'bot' | 'user'; text: string; time: string }>>([
     {
       sender: 'bot',
-      text: `🛡️ *TERRA SHIELD CITIZEN EMERGENCY BOT*\n\nWelcome to District Disaster Early Warning System.\n\nReply with a number:\n1️⃣ Current Safety Advisory for your location\n2️⃣ Nearest Safe Shelter & Evacuation Map\n3️⃣ Report Hazard / Water Logging\n4️⃣ Emergency Helpline Contacts\n5️⃣ भाषा बदलें (Switch to Hindi)`,
+      text: `🛡️ *TERRA SHIELD CITIZEN EMERGENCY BOT*\n\nWelcome to Assam Disaster Early Warning System (Brahmaputra & Kopili River Basin).\n\nReply with a number:\n1️⃣ Current Safety Advisory for your location\n2️⃣ Nearest Safe Shelter & Evacuation Map\n3️⃣ Report Hazard / Water Logging\n4️⃣ Emergency Helpline Contacts\n5️⃣ भाषा बदलें (Switch to Hindi)`,
       time: '10:00 AM'
     }
   ]);
@@ -34,18 +34,18 @@ export const WhatsAppPage: React.FC = () => {
 
       if (choice === '1') {
         reply = lang === 'en'
-          ? `⚠️ *SAFETY ADVISORY: RISHIKESH / SHIVPURI*\n• River Ganga water level: 3.42m (Alert Mark 3.50m)\n• Rain intensity: 12 mm/h\n• Status: *WATCH & PREPARE*\nAvoid riverbanks and low ghats.`
-          : `⚠️ *सुरक्षा परामर्श: ऋषिकेश / शिवपुरी*\n• गंगा जलस्तर: 3.42 मीटर (चेतावनी स्तर 3.50m)\n• वर्षा दर: 12 मिमी/घंटा\n• स्थिति: *सतर्क रहें*\nनदी किनारे जाने से बचें।`;
+          ? `⚠️ *SAFETY ADVISORY: ASSAM 16 JUNE FLOOD (KAMPUR / GUWAHATI)*\n• Kopili River water level: 4.85m (Exceeded HFL 4.75m)\n• Brahmaputra level at Pandu: 49.60m (Critical)\n• Rain intensity: 18 mm/h (2-Year Deluge Peak)\n• Status: *EMERGENCY EVACUATION ACTIVE*\nAvoid Kopili riverbank embankments and move to designated highlands.`
+          : `⚠️ *सुरक्षा परामर्श: असम 16 जून बाढ़ (कामपुर / गुवाहाटी)*\n• कोपिली नदी जलस्तर: 4.85 मीटर (उच्चतम स्तर 4.75m पार)\n• ब्रह्मपुत्र जलस्तर (पांडु): 49.60 मीटर\n• वर्षा दर: 18 मिमी/घंटा (अत्यधिक मूसलाधार)\n• स्थिति: *आपातकालीन निकासी सक्रिय*\nतटबंधों से दूर रहें और तुरंत ऊंचे स्थानों पर जाएं।`;
       } else if (choice === '2') {
         reply = lang === 'en'
-          ? `🏠 *NEAREST SAFE SHELTER*\n*Shivpuri Senior Secondary School Relief Camp*\n• Distance: 1.4 km from your coordinates\n• Capacity: 350 persons\n• Camp Officer: Shri R. Negi (9876543210)\n📍 Google Maps: https://maps.google.com/?q=30.135,78.388`
-          : `🏠 *निकटतम सुरक्षित राहत शिविर*\n*शिवपुरी राजकीय इंटर कॉलेज राहत शिविर*\n• दूरी: 1.4 किमी\n• क्षमता: 350 व्यक्ति\n• शिविर प्रभारी: श्री आर. नेगी (9876543210)`;
+          ? `🏠 *NEAREST SAFE SHELTER*\n*Kampur Higher Secondary School Relief Camp*\n• Distance: 1.1 km from your coordinates\n• Capacity: 650 persons (420 occupied)\n• Camp Officer: Shri P. Bora (03672-245100)\n📍 Google Maps: https://maps.google.com/?q=26.053,92.776`
+          : `🏠 *निकटतम सुरक्षित राहत शिविर*\n*कामपुर उच्चतर माध्यमिक विद्यालय राहत शिविर*\n• दूरी: 1.1 किमी\n• क्षमता: 650 व्यक्ति (420 वर्तमान)\n• शिविर प्रभारी: श्री पी. बोरा (03672-245100)\n📍 स्थान: कामपुर, नगांव (असम)`;
       } else if (choice === '3') {
         reply = lang === 'en'
-          ? `📸 *REPORT HAZARD*\nPlease send the location name or description of the hazard. A field rapid response team will be tagged immediately.`
-          : `📸 *आपदा की सूचना दें*\nकृपया स्थान का नाम या आपदा का विवरण भेजें। आपदा प्रतिक्रिया दल को तुरंत सूचित किया जाएगा।`;
+          ? `📸 *REPORT HAZARD*\nPlease send the location name or description of water breach. Rapid response boats (NDRF 1st Bn) will be dispatched.`
+          : `📸 *आपदा की सूचना दें*\nकृपया स्थान का नाम या तटबंध टूटने की सूचना दें। NDRF 1st Bn बचाव दल को तुरंत भेजा जाएगा।`;
       } else if (choice === '4') {
-        reply = `📞 *EMERGENCY HELPLINES*\n• National Emergency: 112\n• State Disaster Control Room: 1070\n• District Disaster Desk: 1077\n• Free Ambulance Service: 108`;
+        reply = `📞 *EMERGENCY HELPLINES (ASSAM)*\n• ASDMA State Emergency Operations: 1070\n• DEOC Kamrup Metro / Nagaon: 1077\n• NDRF 1st Battalion HQ Patgaon: +91 361 2840284\n• SDRF Assam Fire & Emergency: 0361-2540222\n• Free Ambulance: 108`;
       } else if (choice === '5') {
         const nextLang = lang === 'en' ? 'hi' : 'en';
         setLang(nextLang);
@@ -189,19 +189,19 @@ export const WhatsAppPage: React.FC = () => {
                   {selectedIncident.title}
                 </h3>
                 <div className="text-xs text-slate-400 mt-0.5 font-mono">
-                  Sensor Node: <span className="text-cyan-400">PHY-01</span> (Shivpuri Ghat)
+                  Sensor Node: <span className="text-cyan-400">PHY-03</span> (Kampur Kopili Embankment)
                 </div>
               </div>
 
               <span className="text-[10px] bg-amber-950 text-amber-300 border border-amber-800 px-2 py-0.5 rounded font-mono">
-                Awaiting Pradhan Verification
+                Awaiting Gaonburah Verification
               </span>
             </div>
 
             <div className="border-t border-slate-800 pt-2 text-xs text-slate-300 space-y-1">
-              <div><strong>Registered Sarpanch:</strong> {selectedIncident.sarpanch}</div>
-              <div><strong>Panchayat:</strong> {selectedIncident.village}</div>
-              <div><strong>Phone:</strong> +91 98765 43210</div>
+              <div><strong>Registered Gaonburah:</strong> {selectedIncident.sarpanch}</div>
+              <div><strong>Revenue Circle:</strong> {selectedIncident.village}</div>
+              <div><strong>Phone:</strong> +91 98640 12345</div>
             </div>
 
             <div className="pt-2">

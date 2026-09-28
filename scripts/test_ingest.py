@@ -78,14 +78,14 @@ def test_store_and_forward_delayed_alert():
 
 def test_broadcast_preview():
     print("Test 4: PostGIS ST_DWithin targeted broadcast preview...")
-    resp = requests.get(f"{BASE_URL}/api/v1/alerts/broadcast/preview?lat=30.0869&lng=78.2676&radius_km=15")
+    resp = requests.get(f"{BASE_URL}/api/v1/alerts/broadcast/preview?lat=26.1850&lng=91.7500&radius_km=15")
     assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
     data = resp.json()
     print(f"  [PASS] Calculated audience in 15km radius: {data['recipients_count']} citizens")
 
 def test_knn_contacts():
     print("Test 5: PostGIS KNN nearest contacts query...")
-    resp = requests.get(f"{BASE_URL}/api/v1/contacts?near=30.0869,78.2676")
+    resp = requests.get(f"{BASE_URL}/api/v1/contacts?near=26.1850,91.7500")
     assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
     contacts = resp.json()
     assert len(contacts) > 0

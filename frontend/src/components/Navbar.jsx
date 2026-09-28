@@ -58,20 +58,20 @@ export default function Navbar({
           <div className="wm-ribbon-message">
             {threatSeverity === 'EMERGENCY' ? (
               <span>
-                <strong>Flash Flood Warning:</strong> Upstream surge (+1.92m) detected in Shivpuri-Byasi Sector. Evacuation advisory in effect. Emergency Helplines: <strong>112</strong> / <strong>1070</strong>.
+                <strong>Flash Flood Warning:</strong> Extreme deluge (4.85m HFL breached) at Kampur Kopili Embankment (16 June Incident). Evacuation active. Helplines: <strong>112</strong> / <strong>1070</strong>.
               </span>
             ) : threatSeverity === 'CAUTION' ? (
               <span>
-                <strong>Hydrological Watch:</strong> Moderate rainfall across Garhwal basin. River telemetry active.
+                <strong>Hydrological Watch:</strong> Heavy monsoonal precipitation across Brahmaputra & Kopili basin (Assam). River telemetry active.
               </span>
             ) : (
               <span>
-                <strong>All 20 Catchment Nodes Normal:</strong> Ganga-Chandrabhaga basin telemetry operational. Zero packet loss.
+                <strong>All 20 Catchment Nodes Normal:</strong> Brahmaputra & Kopili basin telemetry operational. Zero packet loss.
               </span>
             )}
           </div>
           <div className="wm-ribbon-meta">
-            <span>Garhwal Basin</span>
+            <span>Assam 16 June Incident</span>
             <span className="wm-meta-sep">•</span>
             <span>20 Nodes</span>
           </div>
@@ -152,23 +152,23 @@ export default function Navbar({
                       <Waves size={14} className="text-sky-500" />
                       <div>
                         <div className="wm-action-head">Flash Flood Surge</div>
-                        <div className="wm-action-sub">+1.92m spike in Shivpuri</div>
+                        <div className="wm-action-sub">4.85m breach in Kampur</div>
                       </div>
                     </button>
 
                     <button onClick={() => handleScenario('WILDFIRE')} className="wm-dropdown-action">
                       <Flame size={14} className="text-orange-500" />
                       <div>
-                        <div className="wm-action-head">Wildfire Hotspot</div>
-                        <div className="wm-action-sub">44°C heatwave in Chilla</div>
+                        <div className="wm-action-head">Hill Slope Warning</div>
+                        <div className="wm-action-sub">Slope slip in Karbi Foothills</div>
                       </div>
                     </button>
 
                     <button onClick={() => handleScenario('POLLUTION_SPIKE')} className="wm-dropdown-action">
                       <Wind size={14} className="text-purple-500" />
                       <div>
-                        <div className="wm-action-head">Severe AQI Smog</div>
-                        <div className="wm-action-sub">PM2.5 spike (345 ug/m3)</div>
+                        <div className="wm-action-head">Industrial AQI Smog</div>
+                        <div className="wm-action-sub">PM2.5 spike in Noonmati</div>
                       </div>
                     </button>
 

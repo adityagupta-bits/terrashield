@@ -4,8 +4,8 @@ import { useUIStore } from '../../store/uiStore';
 
 const TOLL_FREE_NUMBERS = [
   { label: 'National Emergency', number: '112', desc: 'Unified Police / Fire / Medical' },
-  { label: 'State Disaster Helpline', number: '1070', desc: 'Uttarakhand SDMA Control Room' },
-  { label: 'District Disaster Control', number: '1077', desc: 'Dehradun / Tehri Disaster Desk' },
+  { label: 'State Disaster Helpline', number: '1070', desc: 'ASDMA State Operations (Assam)' },
+  { label: 'District Disaster Control', number: '1077', desc: 'Kamrup Metro / Nagaon Desk' },
   { label: 'Emergency Ambulance', number: '108', desc: 'Free ALS / BLS Ambulance Dispatch' }
 ];
 
