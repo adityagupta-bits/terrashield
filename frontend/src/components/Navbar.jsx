@@ -83,7 +83,7 @@ export default function Navbar({
         {/* Left: Brand Lockup */}
         <div className="wm-brand">
           <div className="wm-brand-icon">
-            <Shield size={17} strokeWidth={2.2} />
+            <img src="/logo-shield-transparent.png" alt="TERRA SHIELD Logo" className="wm-brand-logo-img" />
           </div>
           <div className="wm-brand-text">
             <span className="wm-brand-title">TERRA SHIELD</span>

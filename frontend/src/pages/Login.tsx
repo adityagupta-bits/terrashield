@@ -38,8 +38,8 @@ export const Login: React.FC = () => {
       <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 text-2xl shadow-lg shadow-cyan-500/20">
-            🛡️
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 p-2 shadow-xl shadow-emerald-950/50">
+            <img src="/logo-shield-transparent.png" alt="TERRA SHIELD" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-white">
             TERRA SHIELD

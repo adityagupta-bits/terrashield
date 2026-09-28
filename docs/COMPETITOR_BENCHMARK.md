@@ -1,10 +1,8 @@
-# TERRA SHIELD vs. TERRA SENTINEL: Technical Competitive Benchmark
+# TERRA SHIELD 
 
 **Project Benchmark:** TERRA SHIELD (Smart India Hackathon 2026)  
-**Target Competitor:** TERRA SENTINEL (Team Panchatatva | Problem Statement ID: SIH26178 | Category: Hardware)  
-**Reference Video:** [TERRA SENTINEL Demonstration (YouTube)](https://www.youtube.com/watch?v=P9myDSa5HSE)  
 **Core Thesis:** *Transforming Disaster Management from Reactive Observation to Mathematically Grounded Proactive Prevention.*
-
+//Terra Sentinel is some random name we used for comparision, it have no relation with other teams or something//
 ---
 
 ## 1. Executive Summary

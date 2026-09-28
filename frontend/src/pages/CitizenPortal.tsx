@@ -29,8 +29,8 @@ export const CitizenPortal: React.FC = () => {
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div className="max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow">
-              🛡️
+            <div className="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-200/80 flex items-center justify-center p-1 shadow-sm">
+              <img src="/logo-shield-transparent.png" alt="TERRA SHIELD" className="w-full h-full object-contain" />
             </div>
             <div>
               <div className="font-bold text-sm tracking-tight text-slate-900">

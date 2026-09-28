@@ -51,8 +51,8 @@ export const Navbar: React.FC<NavbarProps> = ({ wsStatus }) => {
     <header className="h-16 bg-slate-900 border-b border-slate-800 px-4 flex items-center justify-between z-30 sticky top-0">
       {/* Brand & Project Info */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
-          <Shield size={22} />
+        <div className="w-10 h-10 rounded-lg bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-center p-1 shadow-lg shadow-emerald-900/20">
+          <img src="/logo-shield-transparent.png" alt="TERRA SHIELD" className="w-full h-full object-contain" />
         </div>
         <div>
           <div className="flex items-center gap-2">

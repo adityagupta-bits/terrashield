@@ -39,7 +39,7 @@ export default function GovernmentFooter() {
           <div className="footer-col">
             <div className="govt-emblem-lockup">
               <div className="emblem-symbol">
-                <Shield size={26} className="text-white" />
+                <img src="/logo-shield-transparent.png" alt="TERRA SHIELD Logo" className="govt-emblem-img" />
               </div>
               <div>
                 <div className="govt-ministry-text">ENVIRONMENTAL HAZARD SENSING & MESH RELAY</div>

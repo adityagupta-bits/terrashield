@@ -92,7 +92,7 @@ export default function CitizenView({ alerts = [], shelters = [], onOpenWhatsApp
         <div className="citizen-header-content">
           <div className="citizen-badge-group">
             <span className="citizen-badge">
-              <Shield size={14} className="text-zinc-800" />
+              <img src="/logo-shield-transparent.png" alt="TERRA SHIELD" className="w-4 h-4 object-contain inline-block mr-1" />
               <span>TERRA SHIELD CITIZEN PORTAL</span>
             </span>
             <span className="citizen-sih-tag">SIH26178 Public Advisory</span>
